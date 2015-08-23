@@ -266,12 +266,12 @@
     global.Meatball = Meatball();
 })(this);
 
-global.Meatball.module('test', ['testDep'])
+this.Meatball.module('test', ['testDep'])
     .service('test-service-one', ['test-service-2', function(t) {
         return {
             lol: 'rofl'
         };
     }]);
 
-global.Meatball.module('testDep', [])
+this.Meatball.module('testDep', [])
     .service('test-service-2', [function() { console.log('nothing')}]);
