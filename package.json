@@ -1,0 +1,22 @@
+{
+    "name": "Mimeo.js",
+    "version": "0.0.1",
+    "author": "Thomas Rubbert",
+    "main": "src/Mimeo.js",
+    "description": "A dependency-injection frontend framework for small projects that mimics angulars api",
+    "private": true,
+    "dependencies": {
+    },
+    "devDependencies": {
+        "gulp-react": "3.0.1",
+        "browserify": "11.0.1",
+        "react": "0.13.3",
+        "react-tools": "0.13.3",
+        "gulp-sourcemaps": "1.5.2",
+        "vinyl-source-stream": "1.1.0",
+        "vinyl-buffer": "1.0.0",
+        "gulp-uglify": "1.4.0",
+        "gulp-concat": "2.6.0"
+    },
+    "license": "GPLv2"
+}
