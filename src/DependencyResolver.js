@@ -42,4 +42,10 @@ var DependencyResolver = function() {
     };
 };
 
-module.exports = DependencyResolver;
+/**
+ *
+ * @returns {DependencyResolver}
+ */
+module.exports = function() {
+    return new DependencyResolver();
+};
