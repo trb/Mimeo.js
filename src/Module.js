@@ -1,35 +1,44 @@
+var injectables = require('./dependencies/Injectables.js');
+
 function Module(name, dependencies) {
+    var module = this;
+
     this.$name = name;
     this.$inject = dependencies;
 
-    function Service(name, dependencies, constructor) {
-        this.$name = name;
-        this.$inject = dependencies;
-        this.$constructor = constructor;
-    }
-
-    var createService = function(serviceName, parameters) {
-        if (_injectables[serviceName]) {
-            throw 'Injectable "' + serviceName + '" already exists';
+    function addInjectable(name, parameters) {
+        if (injectables.has(name)) {
+            throw 'Injectable "' + name + '" already exists';
         }
 
-        var dependencies = parameters.slice(0, -1);
-        var definition = parameters.slice(-1)[0];
+        var injectable;
 
-        _injectables[serviceName] = new Service(serviceName,
-            dependencies,
-            definition
-        );
+        if (parameters instanceof Function) {
+            injectable = parameters;
+            if (!injectable.$inject) {
+                injectable.$inject = [];
+            }
+        } else {
+            var dependencies = parameters.slice(0, -1);
+            injectable = parameters.slice(-1)[0];
+            injectable.$inject = dependencies;
+        }
 
-        _injectablesDependencies.register(serviceName);
-        dependencies.forEach(function(dependency) {
-            _injectablesDependencies.addDependency(serviceName, dependency);
+        injectable.$name = name;
+
+        injectables.add(injectable);
+
+        return module;
+    }
+
+    this.service = addInjectable;
+    this.factory = addInjectable;
+    this.directive = addInjectable;
+    this.value = function(name, value) {
+        return addInjectable(name, function() {
+            return value;
         });
-
-        return this;
-    }.bind(this);
-
-    this.service = createService;
+    }
 }
 
 module.exports = Module;

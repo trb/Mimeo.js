@@ -13,13 +13,32 @@
     <script src="../dev/mimeo.js"></script>
 </head>
 <body>
-    <div id="app"></div>
+    <span id="greeting">Hello</span><span id="name"></span>!
 
     <script type="text/javascript">
-        mimeo.module('robertson', [])
-            .service('lol', [function() { console.log('oh my'); }]);
+        (function() {
+            function user() {
+                return {
+                    name: 'Robert'
+                };
+            }
 
-        console.log('output', mimeo.bootstrapToString('lol'));
+            function sayHi(greeting, user) {
+                return function(element) {
+                    document.getElementById('greeting').innerText = greeting;
+                    element.innerText = ' ' + user.name;
+                }
+            }
+
+            sayHi.$inject = ['greeting', 'user'];
+
+            mimeo.module('helloWorld', [])
+                    .value('greeting', 'Good day')
+                    .service('user', user)
+                    .directive('sayHi', sayHi);
+        })();
+
+        mimeo.bootstrap(document.getElementById('name'), 'sayHi');
     </script>
 </body>
 </html>

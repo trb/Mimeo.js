@@ -1,43 +1,39 @@
-var DependencyManager = require('./DependencyManager.js');
 var Module = require('./Module.js');
 
+var modules = require('./dependencies/Modules.js');
+var injectables = require('./dependencies/Injectables.js');
+
 var Mimeo = function() {
-    var _modules = DependencyManager('modules');
-    var _injectables = DependencyManager('injectables');
-
-    function createModule(moduleName, dependencies) {
-        _modules.register(new Module(moduleName, dependencies));
-        return _modules.getProvider(moduleName);
-    }
-
-    function instantiateModules() {
-        if (!_modules.hasAllDependencies()) {
-            throw 'Modules don\'t exist: ' + _modules.getMissingDependencies();
-        }
-    }
-
     function instantiateInjectables() {
-        if (!_injectables.hasAllDependencies()) {
-            throw 'Injectables don\'t exist: ' + _injectables.getMissingDependencies();
+        if (!injectables.hasAllDependencies()) {
+            throw 'Injectables don\'t exist: ' + injectables.getMissingDependencies();
         }
 
-        _injectables.instantiate();
+        injectables.instantiate();
     }
 
     function bootstrapToString() {
-        instantiateModules();
+        modules.instantiate();
         instantiateInjectables();
+    }
+
+    function bootstrap(element, injectableName) {
+        modules.instantiate();
+        instantiateInjectables();
+
+        injectables.get(injectableName)(element);
     }
 
     return {
         module: function(name, dependencies) {
             if (dependencies) {
-                return createModule(name, dependencies);
+                return modules.add(new Module(name, dependencies));
             }
 
-            return _modules.getProvider(name);
+            return modules.get(name);
         },
-        bootstrapToString: bootstrapToString
+        bootstrapToString: bootstrapToString,
+        bootstrap: bootstrap
     }
 };
 

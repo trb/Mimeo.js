@@ -16,7 +16,7 @@ function DependencyManager(name) {
 
     function register(entity) {
         if (!entity.$name || !entity.$inject) {
-            throw 'Entity "' + entity + '" is missing $name or $inject';
+            throw 'Entity "' + entity.$name + '" is missing $name or $inject';
         }
 
         _getMissingDependenciesCache = undefined;
@@ -33,8 +33,8 @@ function DependencyManager(name) {
             return _getMissingDependenciesCache;
         }
 
-        var providersInjects = _providers.map(function(provider) {
-            return provider.$inject;
+        var providersInjects = Object.keys(_providers).map(function(providerName) {
+            return _providers[providerName].$inject;
         });
 
         _getMissingDependenciesCache = [].concat.apply(providersInjects).filter(function(providerName) {
@@ -52,7 +52,7 @@ function DependencyManager(name) {
         _dependencies.getResolutionOrder().forEach(function(providerName) {
             var provider = _providers[providerName];
 
-            _instances[providerName] = provider.$constructor.apply(provider.$constructor, provider.$inject.map(function(dependencyName) {
+            _instances[providerName] = provider.apply(provider, provider.$inject.map(function(dependencyName) {
                 return _instances[dependencyName];
             }));
         });
