@@ -20,3 +20,18 @@ gulp.task('make:development', function() {
             .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('dev/'))
 });
+
+gulp.task('make:production', function() {
+    var b = browserify({
+        entries: './browser.js',
+        debug: true
+    });
+
+    return b.bundle()
+        .pipe(source('mimeo.js'))
+        .pipe(buffer())
+        .pipe(sourcemaps.init({loadMaps: true}))
+        .pipe(uglify())
+        .pipe(sourcemaps.write('./'))
+        .pipe(gulp.dest('dist/'))
+});
