@@ -37,7 +37,7 @@ function DependencyManager(name) {
             return _providers[providerName].$inject;
         });
 
-        _getMissingDependenciesCache = [].concat.apply(providersInjects).filter(function(providerName) {
+        _getMissingDependenciesCache = [].concat.apply([], providersInjects).filter(function(providerName) {
             return !Boolean(_providers[providerName]);
         });
 
@@ -45,7 +45,7 @@ function DependencyManager(name) {
     }
 
     function hasAllDependencies() {
-        return getMissingDependencies().length > 0;
+        return getMissingDependencies().length == 0;
     }
 
     function instantiate() {

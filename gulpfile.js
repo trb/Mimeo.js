@@ -14,11 +14,15 @@ gulp.task('make:development', function() {
 
     return b.bundle()
         .pipe(source('mimeo.js'))
+        .pipe(changed('dev/mimeo.js'))
         .pipe(buffer())
         .pipe(sourcemaps.init({loadMaps: true}))
-            //.pipe(uglify())
             .pipe(sourcemaps.write('./'))
         .pipe(gulp.dest('dev/'))
+});
+
+gulp.task('watch:development', function() {
+    gulp.watch('src/*.js', ['make:development']);
 });
 
 gulp.task('make:production', function() {

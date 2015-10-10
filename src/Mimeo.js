@@ -12,9 +12,21 @@ var Mimeo = function() {
         injectables.instantiate();
     }
 
-    function bootstrapToString() {
+    function bootstrapToString(name) {
+        if (!name) {
+            throw 'Mimeo.bootstrapToString(): Define an injectable to bootstrap!';
+        }
+
         modules.instantiate();
         instantiateInjectables();
+
+        var initInjectable = injectables.get(name);
+
+        if (!initInjectable) {
+            throw 'Mimeo.bootstrap(): Injectable to bootstrap named "' + name + '" not found';
+        }
+
+        return initInjectable();
     }
 
     function bootstrap(element, injectableName) {

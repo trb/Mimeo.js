@@ -31,9 +31,8 @@ function Module(name, dependencies) {
         return module;
     }
 
-    this.service = addInjectable;
     this.factory = addInjectable;
-    this.directive = addInjectable;
+    this.component = addInjectable;
     this.value = function(name, value) {
         return addInjectable(name, function() {
             return value;
