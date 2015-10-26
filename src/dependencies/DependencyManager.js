@@ -1,4 +1,5 @@
-var DependencyResolver = require('./DependencyResolver.js');
+//var DependencyResolver = require('./DependencyResolver.js');
+var Graph = require('./Graph.js');
 
 /**
  *
@@ -10,21 +11,44 @@ var DependencyResolver = require('./DependencyResolver.js');
 function DependencyManager(name) {
     var _providers = {};
     var _instances = {};
-    var _dependencies = DependencyResolver();
+    var _graph = new Graph();
 
     var _getMissingDependenciesCache = undefined;
 
     function register(entity) {
-        if (!entity.$name || !entity.$inject) {
-            throw 'Entity "' + entity.$name + '" is missing $name or $inject';
+        if (!entity) {
+            throw new Error('No entity to register was given');
+        }
+
+        if (!entity.$name) {
+            throw new Error('Entity "' + entity.$name + '" is missing property $name');
+        }
+
+        if (!entity.$inject) {
+            throw new Error('Entity "' + entity.$name + '" is missing property $inject');
+        }
+
+        if (_providers[entity.$name]) {
+            throw new Error('Entity "' + entity.$name + '" already exists');
         }
 
         _getMissingDependenciesCache = undefined;
 
         _providers[entity.$name] = entity;
-        _dependencies.register(entity.$name);
+
+        /*
+         * Name might've been registered as a dependency of another entity
+         */
+        if (!_graph.hasNodeValue(entity.$name)) {
+            _graph.add(entity.$name);
+        }
+
         entity.$inject.forEach(function(dependency) {
-            _dependencies.addDependency(entity.$name, dependency);
+            if (!_graph.hasNodeValue(dependency)) {
+                _graph.add(dependency);
+            }
+
+            _graph.addEdge(dependency, entity.$name);
         });
     }
 
@@ -49,7 +73,7 @@ function DependencyManager(name) {
     }
 
     function instantiate() {
-        _dependencies.getResolutionOrder().forEach(function(providerName) {
+        _graph.getNodesTopological().forEach(function(providerName) {
             var provider = _providers[providerName];
 
             _instances[providerName] = provider.apply(provider, provider.$inject.map(function(dependencyName) {

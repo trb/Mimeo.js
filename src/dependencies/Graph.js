@@ -1,4 +1,8 @@
 var Node = function(value) {
+    if (!(value instanceof String || typeof value === 'string')) {
+        throw new Error('Only strings are accepted as node values');
+    }
+
     this._id = Math.random().toString(36);
     this.value = value;
 };
@@ -19,7 +23,8 @@ Edge.prototype.getNodeIdentifier = function() {
 };
 
 /**
- * Directed graph to order nodes by dependencies. Favors precomputating lookup
+ * Directed graph to order nodes by dependencies. Only handles values whose
+ * .toString() function returns unique values. Favors pre-computed lookup
  * tables over lookups at sort time. Most machines have lots of ram and
  * especially on mobile the CPU is more restricted. Using more ram and less
  * CPU cycles is preferable in those conditions, although it should hardly
@@ -58,7 +63,7 @@ var Graph = function() {
 
     var addNode = function(node) {
         if (_nodesByValue[node.value]) {
-            throw 'Duplicate values not allowed. Node with value "' + node.value + '" already exists';
+            throw new Error('Duplicate values not allowed. Node with value "' + node.value + '" already exists');
         }
 
         _nodes.push(node);
@@ -96,16 +101,14 @@ var Graph = function() {
         });
 
         delete _edgesByNodes[edgeToRemove.getNodeIdentifier()];
-        if (_edgesByFrom[edgeToRemove._from._id]) {
-            _edgesByFrom[edgeToRemove._from._id] = _edgesByFrom[edgeToRemove._from._id].filter(function(edge) {
-                return edge._id != edgeToRemove._id;
-            });
-        }
-        if (_edgesByTo[edgeToRemove._to._id]) {
-            _edgesByTo[edgeToRemove._to._id] = _edgesByTo[edgeToRemove._to._id].filter(function(edge) {
-                return edge._id != edgeToRemove._id;
-            });
-        }
+
+        _edgesByFrom[edgeToRemove._from._id] = _edgesByFrom[edgeToRemove._from._id].filter(function(edge) {
+            return edge._id != edgeToRemove._id;
+        });
+
+        _edgesByTo[edgeToRemove._to._id] = _edgesByTo[edgeToRemove._to._id].filter(function(edge) {
+            return edge._id != edgeToRemove._id;
+        });
     };
 
     var getNodeByValue = function(value) {
@@ -152,16 +155,20 @@ var Graph = function() {
             }
 
             if (_edges.length > 0) {
-                reset();
-
-                throw 'Cycle detected, remaining edges: ' + _edges.map(function(edge) {
+                var remainingEdges = _edges.map(function(edge) {
                     return '(' + edge._from.value + ',' + edge._to.value + ')';
                 });
+
+                reset();
+
+                throw new Error('Cycle detected, remaining edges: ' + remainingEdges);
             }
 
             reset();
 
-            return sortedNodes;
+            return sortedNodes.map(function(node) {
+                return node.value;
+            });
         }
     };
 };

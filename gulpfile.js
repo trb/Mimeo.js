@@ -14,7 +14,6 @@ gulp.task('make:development', function() {
 
     return b.bundle()
         .pipe(source('mimeo.js'))
-        .pipe(changed('dev/mimeo.js'))
         .pipe(buffer())
         .pipe(sourcemaps.init({loadMaps: true}))
             .pipe(sourcemaps.write('./'))

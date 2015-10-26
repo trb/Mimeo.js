@@ -52,4 +52,45 @@ describe('DependencyManager', function() {
         expect(dm.hasAllDependencies()).to.be.false;
         expect(dm.getMissingDependencies()).to.deep.equal(['b']);
     });
+
+    it('should not accept an empty entity', function() {
+        var dm = makeDependencyManager('test');
+
+        expect(dm.register).to.throw(Error, 'No entity to register was given');
+    });
+
+    it('should not accept an entity without a name', function() {
+        var dm = makeDependencyManager('test');
+
+        var a = function() {};
+        a.$inject = [];
+
+        expect(dm.register.bind(dm, a)).to.throw(Error, 'missing property $name');
+    });
+
+    it('should not accept an entity without injection parameters', function() {
+        var dm = makeDependencyManager('test');
+
+        var a = function() {};
+        a.$name = 'test';
+
+        expect(dm.register.bind(dm, a)).to.throw(Error, 'missing property $inject');
+    });
+
+    it('should not accept entities with the same name', function() {
+        var dm = makeDependencyManager('test');
+
+        function a() {}
+        function aDuplicate() {}
+
+        a.$name = 'a';
+        a.$inject = [];
+
+        aDuplicate.$name = 'a';
+        aDuplicate.$inject = [];
+
+        dm.register(a);
+
+        expect(function() { dm.register(aDuplicate); }).to.throw('already exists');
+    });
 });

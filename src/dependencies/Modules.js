@@ -1,22 +1,26 @@
-var modules = require('./DependencyManager.js')('modules');
+var DependencyManager = require('./DependencyManager.js');
 
-function add(module) {
-    modules.register(module);
-    return module;
-}
+module.exports = function() {
+    var modules = DependencyManager('modules');
 
-function instantiateModules() {
-    if (!modules.hasAllDependencies()) {
-        throw 'Modules don\'t exist: ' + modules.getMissingDependencies();
+    function add(module) {
+        modules.register(module);
+        return module;
     }
-}
 
-function get(name) {
-    return modules.getProvider(name);
-}
+    function instantiateModules() {
+        if (!modules.hasAllDependencies()) {
+            throw new Error('Modules don\'t exist: ' + modules.getMissingDependencies());
+        }
+    }
 
-module.exports = {
-    add: add,
-    get: get,
-    instantiate: instantiateModules
+    function get(name) {
+        return modules.getProvider(name);
+    }
+
+    return {
+        add: add,
+        get: get,
+        instantiate: instantiateModules
+    };
 };

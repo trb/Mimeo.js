@@ -1,6 +1,4 @@
-var injectables = require('./dependencies/Injectables.js');
-
-function Module(name, dependencies) {
+function Module(injectables, name, dependencies) {
     var module = this;
 
     this.$name = name;
@@ -8,7 +6,7 @@ function Module(name, dependencies) {
 
     function addInjectable(name, parameters) {
         if (injectables.has(name)) {
-            throw 'Injectable "' + name + '" already exists';
+            throw new Error('Injectable "' + name + '" already exists');
         }
 
         var injectable;

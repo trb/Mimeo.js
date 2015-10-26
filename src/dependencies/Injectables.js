@@ -1,34 +1,43 @@
-var injectables = require('./DependencyManager.js')('injectables');
+var DependencyManager = require('./DependencyManager.js');
 
-function add(injectable) {
-    injectables.register(injectable);
-    return injectable;
-}
+module.exports = function() {
+    var injectables = DependencyManager('injectables');
 
-function instantiateInjectables() {
-    if (!injectables.hasAllDependencies()) {
-        throw 'Injectables don\'t exist: ' + injectables.getMissingDependencies();
+    function add(injectable) {
+        injectables.register(injectable);
+        return injectable;
     }
 
-    injectables.instantiate();
-}
+    function instantiateInjectables() {
+        if (!injectables.hasAllDependencies()) {
+            throw new Error('Injectables don\'t exist: ' + injectables.getMissingDependencies());
+        }
 
-function has(name) {
-    return Boolean(injectables.getProvider(name));
-}
+        injectables.instantiate();
+    }
 
-function get(name) {
-    return injectables.getInstance(name);
-}
+    function has(name) {
+        return Boolean(injectables.getProvider(name));
+    }
 
-function hasAllDependencies() {
-    return injectables.hasAllDependencies();
-}
+    function get(name) {
+        return injectables.getInstance(name);
+    }
 
-module.exports = {
-    add: add,
-    get: get,
-    has: has,
-    instantiate: instantiateInjectables,
-    hasAllDependencies: hasAllDependencies
+    function hasAllDependencies() {
+        return injectables.hasAllDependencies();
+    }
+
+    function getMissingDependencies() {
+        return injectables.getMissingDependencies();
+    }
+
+    return {
+        add: add,
+        get: get,
+        has: has,
+        instantiate: instantiateInjectables,
+        hasAllDependencies: hasAllDependencies,
+        getMissingDependencies: getMissingDependencies
+    };
 };
