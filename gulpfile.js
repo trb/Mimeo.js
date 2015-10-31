@@ -20,7 +20,7 @@ gulp.task('make:development', function() {
         .pipe(gulp.dest('dev/'))
 });
 
-gulp.task('watch:development', function() {
+gulp.task('watch:development', ['make:development'], function() {
     gulp.watch('src/*.js', ['make:development']);
 });
 

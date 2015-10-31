@@ -4,16 +4,21 @@
   "author": "Thomas Rubbert",
   "main": "src/Mimeo.js",
   "scripts": {
-      "watch:development": "node_modules/.bin/gulp watch:development",
-      "build:development": "node_modules/.bin/gulp make:development",
-      "build:production": "node_modules/.bin/gulp make:production",
-      "build": "npm run build:development; npm run build:production",
-      "coverage": "node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- -R spec",
-      "test": "node_modules/.bin/mocha"
+    "develop": "npm run server:start; npm run watch:development",
+    "watch:development": "node_modules/.bin/gulp watch:development",
+    "build:development": "node_modules/.bin/gulp make:development",
+    "build:production": "node_modules/.bin/gulp make:production",
+    "build": "npm run build:development; npm run build:production",
+    "coverage": "node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- -R spec",
+    "test": "node_modules/.bin/mocha",
+    "server:start": "python -m SimpleHTTPServer 8080 &>server.log & echo $! > server.pid",
+    "server:stop": "kill $(cat server.pid) && rm server.pid && rm server.log"
   },
   "description": "A dependency-injection frontend framework for small projects that mimics angulars api",
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "route-recognizer": "0.1.9"
+  },
   "devDependencies": {
     "gulp-react": "3.0.1",
     "browserify": "11.0.1",

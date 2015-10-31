@@ -36,6 +36,10 @@ describe('Mimeo', function() {
         ;
     });
 
+    it('should notify of missing injectable when bootstrapping', function() {
+        expect(function() { mimeo.bootstrap('does-not-exist'); }).to.throw('to bootstrap not found');
+    });
+
     it('basic instantiation should render to string ', function() {
         expect(mimeo.bootstrap('main')).to.equal('1-test-no');
     });
