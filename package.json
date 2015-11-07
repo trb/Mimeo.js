@@ -17,6 +17,7 @@
   "description": "A dependency-injection frontend framework for small projects that mimics angulars api",
   "private": true,
   "dependencies": {
+    "parseuri": "0.0.4",
     "route-recognizer": "0.1.9"
   },
   "devDependencies": {

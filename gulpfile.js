@@ -21,7 +21,7 @@ gulp.task('make:development', function() {
 });
 
 gulp.task('watch:development', ['make:development'], function() {
-    gulp.watch('src/*.js', ['make:development']);
+    gulp.watch('src/**/*.js', ['make:development']);
 });
 
 gulp.task('make:production', function() {

@@ -3,9 +3,13 @@ var Module = require('./Module.js');
 var Modules = require('./dependencies/Modules.js');
 var Injectables = require('./dependencies/Injectables.js');
 
+var registerBuiltIns = require('./builtins/Register.js');
+
 var Mimeo = function() {
     var modules = Modules();
     var injectables = Injectables();
+
+    registerBuiltIns(injectables);
 
     function instantiateInjectables() {
         if (!injectables.hasAllDependencies()) {
