@@ -1,4 +1,6 @@
+var Promise = require('./Promise.js');
 var Routing = require('./Routing.js');
+var Http = require('./Http.js');
 
 function Window() {
     if (typeof window === 'undefined') {
@@ -32,4 +34,13 @@ module.exports = function(injectables) {
 
     injectables.add(Routing.Context);
     injectables.add(Routing.Routing);
+
+    Promise.$name = '$q';
+    Promise.$inject = [];
+
+    injectables.add(Promise);
+
+    Http.$name = '$http';
+    Http.$inject = ['$window'];
+    injectables.add(Http);
 };

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Todo Example App</title>
+</head>
+<body>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script type="text/javascript" src="../../dev/mimeo.js"></script>
+    <script type="text/javascript">
+        function test($http) {
+            console.log($http);
+            $http.get('/examples/routing/rokkuting.html').then(function() {
+                console.log('success', arguments);
+            }, function() {
+                console.log('reject', arguments);
+            });
+            return function() { return true; };
+        }
+
+        test.$name = 'test';
+        test.$inject = ["$http"];
+
+        mimeo.module('test', [])
+                .factory('test', test);
+
+        mimeo.bootstrap('test');
+    </script>
+</body>
+</html>

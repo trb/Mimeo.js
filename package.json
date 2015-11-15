@@ -4,6 +4,7 @@
   "author": "Thomas Rubbert",
   "main": "src/Mimeo.js",
   "scripts": {
+    "preintegration-test": "./bin/ensure-xvfb-exists.sh",
     "develop": "npm run server:start; npm run watch:development",
     "watch:development": "node_modules/.bin/gulp watch:development",
     "build:development": "node_modules/.bin/gulp make:development",

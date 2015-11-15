@@ -81,5 +81,5 @@ describe('Promise', function() {
         defer1.resolve(testValue1);
         defer3.resolve(testValue3);
         defer2.resolve(testValue2);
-    })
+    });
 });
