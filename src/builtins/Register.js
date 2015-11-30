@@ -7,6 +7,7 @@ function Window() {
         var noOp = function() {
         };
         return {
+            $fake: true,
             onpopstate: noOp,
             onclick: noOp,
             onload: noOp,

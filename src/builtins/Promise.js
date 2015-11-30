@@ -21,6 +21,8 @@ function Deferred(callback) {
             if (onNotify) {
                 notifyCallbacks.push(onNotify);
             }
+
+            return promise;
         }
     };
 
