@@ -11,22 +11,22 @@ var Mimeo = function() {
 
     registerBuiltIns(injectables);
 
-    function instantiateInjectables() {
-        if (!injectables.hasAllDependencies()) {
-            throw new Error('Injectables don\'t exist: ' + injectables.getMissingDependencies());
-        }
-
-        injectables.instantiate();
-    }
-
     function bootstrap(injectableName) {
         if (!injectableName) {
             throw new Error('Define an injectable to bootstrap!');
         }
 
-        modules.instantiate();
+        if (!modules.hasAllDependencies()) {
+            throw new Error('Modules don\'t exist: ' + modules.getMissingDependencies());
+        }
 
-        instantiateInjectables();
+        if (!injectables.hasAllDependencies()) {
+            throw new Error('Injectables don\'t exist: ' + injectables.getMissingDependencies());
+        }
+
+        injectables.instantiate();
+
+        modules.instantiate();
 
         var entryInjectable = injectables.get(injectableName);
 

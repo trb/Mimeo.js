@@ -1,10 +1,12 @@
 function Module(injectables, name, dependencies) {
     var module = this;
 
+    var toRun = [];
+
     this.$name = name;
     this.$inject = dependencies;
 
-    function addInjectable(name, parameters) {
+    function prepareInjectable(name, parameters) {
         if (injectables.has(name)) {
             throw new Error('Injectable "' + name + '" already exists');
         }
@@ -24,10 +26,31 @@ function Module(injectables, name, dependencies) {
 
         injectable.$name = name;
 
-        injectables.add(injectable);
+        return injectable;
+    }
+
+    function addInjectable(name, parameters) {
+        injectables.add(prepareInjectable(name, parameters));
 
         return module;
     }
+
+    function executeRun() {
+        toRun.forEach(function(injectableToRun) {
+            injectables.get(injectableToRun)();
+        });
+    }
+
+    this.executeRun = function executeRun() {
+        toRun.forEach(function(injectableName) {
+            injectables.get(injectableName)();
+        });
+    };
+
+    this.run = function(name, parameters) {
+        toRun.push(name);
+        addInjectable(name, parameters);
+    };
 
     this.factory = addInjectable;
     this.component = addInjectable;

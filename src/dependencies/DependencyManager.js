@@ -97,7 +97,19 @@ function DependencyManager(name) {
         getMissingDependencies: getMissingDependencies,
         instantiate: instantiate,
         getProvider: getProvider,
-        getInstance: getInstance
+        getInstance: getInstance,
+        all: {
+            providers: function(callback) {
+                Object.keys(_providers).forEach(function(name) {
+                    callback(name, _providers[name]);
+                });
+            },
+            instances: function(callback) {
+                Object.keys(_instances).forEach(function(name) {
+                    callback(name, _instances[name]);
+                });
+            }
+        }
     }
 }
 

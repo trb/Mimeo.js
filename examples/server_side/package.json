@@ -1,0 +1,17 @@
+{
+  "name": "mimeo-example-server",
+  "version": "1.0.0",
+  "description": "Use mimeo on server to render static html pages",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server:start": "[ -f server.pid ] && exit; node server/api.js &>server.log & echo $! > server.pid",
+    "server:stop": "[ ! -f server.pid ] && exit; kill $(cat server.pid) && rm server.pid && rm server.log",
+    "server:restart": "npm run server:stop; npm run server:start"
+  },
+  "dependencies": {
+    "express": "4.13.3"
+  },
+  "author": "Thomas Rubbert",
+  "license": "MIT"
+}

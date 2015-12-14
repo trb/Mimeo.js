@@ -36,12 +36,11 @@ describe('Modules', function() {
 
         m.$name = 'm';
         m.$inject = ['does-not-exist'];
+        m.executeRun = function() {};
 
         modules.add(m);
 
-        expect(function() {
-            modules.instantiate()
-        }).to.throw('Modules don\'t exist');
+        expect(modules.hasAllDependencies()).to.be.false;
     });
 
     it('should instantiate when all dependencies are met', function() {
@@ -50,6 +49,7 @@ describe('Modules', function() {
 
         m.$name = 'm';
         m.$inject = [];
+        m.executeRun = function() {};
 
         modules.add(m);
 

@@ -8,19 +8,32 @@ module.exports = function() {
         return module;
     }
 
+    function hasAllDependencies() {
+        return modules.hasAllDependencies();
+    }
+
     function instantiateModules() {
-        if (!modules.hasAllDependencies()) {
-            throw new Error('Modules don\'t exist: ' + modules.getMissingDependencies());
-        }
+        modules.all.providers(function(_, module) {
+            console.log('module', _, module, module.executeRun);
+            if (module) {
+                module.executeRun();
+            }
+        });
     }
 
     function get(name) {
         return modules.getProvider(name);
     }
 
+    function getMissingDependencies() {
+        return modules.getMissingDependencies();
+    }
+
     return {
         add: add,
         get: get,
-        instantiate: instantiateModules
+        instantiate: instantiateModules,
+        hasAllDependencies: hasAllDependencies,
+        getMissingDependencies: getMissingDependencies
     };
 };
