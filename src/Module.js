@@ -35,21 +35,37 @@ function Module(injectables, name, dependencies) {
         return module;
     }
 
-    function executeRun() {
-        toRun.forEach(function(injectableToRun) {
-            injectables.get(injectableToRun)();
-        });
-    }
-
     this.executeRun = function executeRun() {
         toRun.forEach(function(injectableName) {
             injectables.get(injectableName)();
         });
     };
 
-    this.run = function(name, parameters) {
+    this.run = function(parameters) {
+        var name = module.$name + '-run.' + toRun.length;
         toRun.push(name);
-        addInjectable(name, parameters);
+
+        var provider = function providerRun() {
+            var args = arguments;
+            return function() {
+                if (parameters instanceof Function) {
+                    return parameters.apply(parameters, args);
+                } else {
+                    var lastEntry = parameters.slice(-1)[0];
+                    return lastEntry.apply(lastEntry, args);
+                }
+            }
+        };
+
+        if (parameters instanceof Function) {
+            provider.$inject = parameters.$inject;
+        } else {
+            provider.$inject = parameters.slice(0, -1);
+        }
+
+        addInjectable(name, provider);
+
+        return module;
     };
 
     this.factory = addInjectable;

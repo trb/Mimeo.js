@@ -14,7 +14,6 @@ module.exports = function() {
 
     function instantiateModules() {
         modules.all.providers(function(_, module) {
-            console.log('module', _, module, module.executeRun);
             if (module) {
                 module.executeRun();
             }

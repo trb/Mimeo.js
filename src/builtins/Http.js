@@ -47,11 +47,20 @@ function nodeRequest(config, resolve, reject) {
     }
 
     function configToNode(config) {
+        if (config.host && config.host.indexOf(':') !== -1) {
+            var hostParts = config.host.split(':');
+            var host = hostParts[0];
+            var port = hostParts[1];
+        } else {
+            var host = config.host;
+            var port = 80;
+        }
         return {
             method: config.method || 'GET',
             path: config.protocol + '://' + config.host + config.url,
             headers: config.headers || {},
-            host: config.host,
+            host: host,
+            port: port,
             protocol: config.protocol + ':'
         }
     }
@@ -143,7 +152,7 @@ module.exports = function($window) {
     }
 
     doHttp.$host = '';
-    doHttp.$protocol = '';
+    doHttp.$protocol = 'https';
 
     doHttp.get = function(url, config) {
         config = config || {};
