@@ -41,6 +41,30 @@ function Module(injectables, name, dependencies) {
         });
     };
 
+    /*
+     * I don't like the wrapper and auto-generated name, but for now I can't
+     * come up with a better solution. The problem is that the run-function
+     * needs to work with the injection system (since it can have other
+     * injectables injected), and the whole system isn't designed to deal with
+     * unnamed things.
+     *
+     * In fact, I feel that an injection system that can handle unnamed items
+     * would be wrong. How would you identify what to inject? Having names for
+     * injectables (or at least IDs) is a core aspect of an injection system.
+     *
+     * So this would have to live outside of it. But that means having it's own
+     * "make sure all this injectables" exist system. Then we could just get the
+     * named injectables the run-function needs and call the run-function with
+      * those.
+      *
+      * I can't think of a good way to de-duplicated that dependency resolution
+      * system though, so there'd be one for all named injectables and one for
+      * the run-functions.
+      *
+      * I don't plan on having other unnamed injectables, so I feel that effort
+      * would be wasted. Hence the "hack" here with an auto-generated name and
+      * a wrapper that executes the run-function with pass-through arguments.
+     */
     this.run = function(parameters) {
         var name = module.$name + '-run.' + toRun.length;
         toRun.push(name);

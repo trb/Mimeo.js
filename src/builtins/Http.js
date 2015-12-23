@@ -30,12 +30,16 @@ function jQueryLikeRequest(jQueryLike, config, resolve, reject) {
     }).then(success, error);
 }
 
-function jQueryRequest(config, resolve, reject) {
-    jQueryLikeRequest($window.jQuery, config, resolve, reject);
+function jQueryRequest($window) {
+    return function(config, resolve, reject) {
+        jQueryLikeRequest($window.jQuery, config, resolve, reject);
+    }
 }
 
-function zeptoRequest(config, resolve, reject) {
-    jQueryLikeRequest($window.Zepto, config, resolve, reject);
+function zeptoRequest($window) {
+    return function(config, resolve, reject) {
+        jQueryLikeRequest($window.Zepto, config, resolve, reject);
+    }
 }
 
 function nodeRequest(config, resolve, reject) {
@@ -55,6 +59,7 @@ function nodeRequest(config, resolve, reject) {
             var host = config.host;
             var port = 80;
         }
+
         return {
             method: config.method || 'GET',
             path: config.protocol + '://' + config.host + config.url,
@@ -86,6 +91,14 @@ function nodeRequest(config, resolve, reject) {
         });
 
         response.on('end', function() {
+            /*
+             * jQuery will parse JSON replies automatically, so replicate that
+             * behaviour for nodejs
+             */
+            if (response.headers['content-type'] && response.headers['content-type'].match(/^application\/json/i)) {
+                body = JSON.parse(body);
+            }
+
             resolve({
                 data: body,
                 headers: response.headers,
@@ -110,9 +123,9 @@ function vendorSpecificRequest($window) {
         return nodeRequest;
     } else {
         if ($window.jQuery) {
-            return jQueryRequest;
+            return jQueryRequest($window);
         } else if ($window.Zepto) {
-            return zeptoRequest;
+            return zeptoRequest($window);
         } else {
             throw new Error('No supported ajax library found (jQuery or Zepto)');
         }
