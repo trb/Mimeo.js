@@ -1,3 +1,5 @@
+var React = require('react');
+
 function User($http) {
     return function(userId) {
         var data = {
@@ -29,11 +31,17 @@ function Messages($http) {
 Messages.$inject = ['$http'];
 
 function WelcomePage($q, User, Messages) {
+    var Welcome = React.createClass({
+        render: function() {
+            return <h1>Hi {this.props.user.name }</h1>;
+        }
+    });
+
     return function(userId) {
         var user = User(userId);
         var messages = Messages(userId);
 
-        return $q(function(resolve, reject) {
+        Welcome.promise = $q(function(resolve, reject) {
             $q.all([user.promise, messages.promise]).then(function() {
                 resolve({
                     user: user.data,
@@ -42,7 +50,9 @@ function WelcomePage($q, User, Messages) {
             }, function() {
                 reject();
             });
-        })
+        });
+
+        return Welcome;
     }
 }
 

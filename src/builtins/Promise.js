@@ -27,6 +27,12 @@ function Deferred(callback) {
     };
 
     var resolve = function(resolution) {
+        /*
+         * Store first resolution so future .then() calls will be
+         * resolved immediately
+         */
+        resolvedValue = resolution;
+        resolved = true;
         resolveCallbacks.forEach(function(callback) {
             callback(resolution);
         });
