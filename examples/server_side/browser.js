@@ -18,4 +18,4 @@ InBrowser.$inject = ['WelcomePage'];
 mimeo.module('example-server')
     .component('InBrowser', InBrowser);
 
-mimeo.bootstrap('InBrowser', $('#app')[0]);
+mimeo.bootstrap('InBrowser', $('#app').first());

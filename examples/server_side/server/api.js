@@ -18,7 +18,7 @@ app.get('/users', function(request, response) {
 });
 
 app.get('/users/:userId', function(request, response) {
-    response.json(users[request.params.userId]);
+    response.json(users[parseInt(request.params.userId)-1]);
 });
 
 app.get('/messages/:userId', function(request, response) {

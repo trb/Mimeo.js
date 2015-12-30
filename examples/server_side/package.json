@@ -8,13 +8,17 @@
     "server:start": "[ -f server.pid ] && exit; node server/api.js &>server.log & echo $! > server.pid",
     "server:stop": "[ ! -f server.pid ] && exit; kill $(cat server.pid) && rm server.pid && rm server.log",
     "server:restart": "npm run server:stop; npm run server:start",
-    "build:dev": "node_modules/.bin/browserify browser.js -o html/assets/app.compiled.js --debug -t [ babelify --presets [ es2015 react ] ]"
+    "build:dev": "node_modules/.bin/browserify browser.js -o html/assets/app.compiled.js --debug -t [ babelify ]",
+    "build:production": "NODE_ENV=production node_modules/.bin/browserify browser.js -t [ babelify ] -t envify -g uglifyify -o html/assets/app.min.js",
+    "cli": "node_modules/.bin/babel-node --debug ./cli.js"
   },
   "dependencies": {
     "express": "4.13.3",
     "react": "0.14.3"
   },
   "devDependencies": {
+    "babel-cli": "6.3.17",
+    "babel-core": "^6.3.26",
     "babel-preset-es2015": "6.3.13",
     "babel-preset-react": "6.3.13",
     "babelify": "7.2.0",

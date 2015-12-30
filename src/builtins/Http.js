@@ -95,7 +95,7 @@ function nodeRequest(config, resolve, reject) {
              * jQuery will parse JSON replies automatically, so replicate that
              * behaviour for nodejs
              */
-            if (response.headers['content-type'] && response.headers['content-type'].match(/^application\/json/i)) {
+            if (body && response.headers['content-type'] && response.headers['content-type'].match(/^application\/json/i)) {
                 body = JSON.parse(body);
             }
 

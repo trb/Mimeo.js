@@ -34,6 +34,10 @@ var Mimeo = function() {
             throw new Error('Injectable "' + injectableName + '" to bootstrap not found');
         }
 
+        if (!entryInjectable instanceof Function) {
+            throw new Error('Injectable "' + injectableName + '" is not executable');
+        }
+
         return entryInjectable.apply(entryInjectable, Array.prototype.slice.call(arguments, 1));
     }
 

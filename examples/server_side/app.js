@@ -3,7 +3,7 @@ var React = require('react');
 function User($http) {
     return function(userId) {
         var data = {
-            promise: $http.get('/users/' + userId).then(function(user) {
+            promise: $http.get('/users/' + String(userId)).then(function(user) {
                 data.data = user.data;
             }),
             data: {}
