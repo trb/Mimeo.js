@@ -27,13 +27,9 @@ module.exports = function(injectables) {
 
     injectables.add(Window);
 
-    Routing.Context.$name = '$context';
-    Routing.Context.$inject = [];
-
     Routing.Routing.$name = '$routing';
     Routing.Routing.$inject = ['$window'];
 
-    injectables.add(Routing.Context);
     injectables.add(Routing.Routing);
 
     Promise.$name = '$q';

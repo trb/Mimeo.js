@@ -1,13 +1,6 @@
 var RouteRecognizer = require('route-recognizer');
 var parseUri = require('parseuri');
 
-var context = {};
-function Context() {
-    return function() {
-        return context;
-    }
-}
-
 function Routing($window) {
     var routing = new RouteRecognizer();
     var defaultRoute;
@@ -65,13 +58,13 @@ function Routing($window) {
         var handlers = routing.recognize(urlParts.path);
         if (handlers) {
             for (var i=0; i<handlers.length; ++i) {
-                context = {
+               var $context = {
                     url: urlParts,
-                    params: handlers.params,
+                    params: handlers[i].params,
                     query: queryToDict(urlParts.query)
                 };
 
-                handlers[i].handler();
+                handlers[i].handler($context);
             }
         } else if (doDefault !== false) {
             doDefaultRoute(defaultRoute);
@@ -127,19 +120,30 @@ function Routing($window) {
             defaultRoute = newDefaultRoute;
         },
         'set': function(route, target, injectable, name) {
+            if (!(injectable instanceof Function)) {
+                var message = 'To set a route, you have to provide an injectable that is executable (i.e. instanceof Function). Route: ' + route + ', stringified injectable: "' + String(injectable + '"');
+                if ((target instanceof Function) && ((injectable instanceof String) || (typeof injectable === 'string'))) {
+                    message += '. Target is a function and injectable is a string. You might have switched the parameters, please double-check that';
+                }
+                throw new Error(message);
+            }
+
             routing.add([
                 {
                     path: route,
-                    handler: function() {
+                    handler: function($context) {
                         var html;
+                        var targetAsDOMNode = $window.document.getElementById(target);
 
                         if (injectable.render) {
-                            html = injectable.render();
+                            html = injectable.render($context, targetAsDOMNode);
                         } else {
-                            html = injectable();
+                            html = injectable($context, targetAsDOMNode);
                         }
 
-                        $window.document.getElementById(target).innerHTML = html;
+                        if (typeof html === 'string' || (html instanceof String)) {
+                            targetAsDOMNode.innerHTML = html;
+                        }
                     }
                 }
             ], {'as': name});
@@ -151,6 +155,5 @@ function Routing($window) {
 }
 
 module.exports = {
-    'Context': Context,
     'Routing': Routing
 };

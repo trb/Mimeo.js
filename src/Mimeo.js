@@ -31,11 +31,11 @@ var Mimeo = function() {
         var entryInjectable = injectables.get(injectableName);
 
         if (!Boolean(entryInjectable)) {
-            throw new Error('Injectable "' + injectableName + '" to bootstrap not found');
+            throw new Error('Injectable "' + injectableName + '" to bootstrap not found. Stringyfied injectable: ' + entryInjectable);
         }
 
         if (!entryInjectable instanceof Function) {
-            throw new Error('Injectable "' + injectableName + '" is not executable');
+            throw new Error('Injectable "' + injectableName + '" is not executable. Stringyfied injectable: ' + String(entryInjectable));
         }
 
         return entryInjectable.apply(entryInjectable, Array.prototype.slice.call(arguments, 1));
