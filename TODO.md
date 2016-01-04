@@ -30,3 +30,4 @@
 - Write tests for non-covered code (use istanbul to find that)
 - Fix promise.then(), chained then's should received previous resolved value
 - Remove babel presets once mimeo is installable via npm
+- Figure out how to handle .then() calls on a resolved chain
