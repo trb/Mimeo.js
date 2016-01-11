@@ -214,9 +214,7 @@ describe('Promise', function() {
 
             var promise = $q(function(resolve) {
                 //allow .then calls to attach
-                setTimeout(function() {
-                    resolve(originalValue);
-                }, 10);
+                resolve(originalValue);
             });
 
             promise
