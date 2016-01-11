@@ -1,106 +1,84 @@
 function Chain() {
-    var state = 'unresolved';
-    var resolvedValue;
-    var error;
+    var state = 'pending';
+    var onResolves = [new SingleDefer()];
 
-    var resolveCallbacks = [];
-    var rejectCallbacks = [];
-    var notifyCallbacks = [];
-    var finallyCallbacks = [];
+    function reject() {}
 
-    function executeCallbacks(callbacks, argument) {
-        callbacks.forEach(function(callback) {
-            callback(argument);
-        });
-    }
+    function SingleDefer() {
+        var resolved = false;
+        var resolution;
 
-    function resolve(resolution) {
-        state = 'resolved';
-        resolvedValue = resolution;
+        var rejected = false;
+        var rejection;
 
-        function executeNext(callbackIndex, previousResolution) {
-            if (!previousResolution) {
-                return;
-            }
-            if (callbackIndex >= resolveCallbacks.length) {
-                return;
-            }
+        var onResolve = function() {};
+        var onReject = function() {};
 
-            var returnValue = resolveCallbacks[callbackIndex](previousResolution);
-            if (returnValue && (typeof returnValue.then === 'function' || (returnValue.then instanceof Function))) {
-                returnValue.then(function(nextResolution) {
-                    executeNext(++callbackIndex, nextResolution);
-                });
-            } else {
-                executeNext(++callbackIndex, returnValue);
-            }
-        }
+        return {
+            resolve: function(value) {
+                resolved = true;
+                resolution = value;
 
-        executeNext(0, resolution);
+                onResolve(value);
+            },
+            reject: function(error) {
+                rejected = true;
+                rejection = error;
 
-        done();
-    }
+                onReject(error);
+            },
+            promise: {
+                then: function(resolveHandler, rejectHandler) {
+                    onResolve = resolveHandler;
+                    if (resolved) {
+                        onResolve(resolution);
+                    }
 
-    function reject(error) {
-        state = 'rejected';
-
-        executeCallbacks(rejectCallbacks, error);
-
-        done();
-    }
-
-    function done() {
-        executeCallbacks(finallyCallbacks);
-    }
-
-    var publicApi = {
-        /*
-         * Figure out how to handle .then() calls to a resolved chain
-         *
-         * Thoughts:
-         *
-         * Split up the callback chain execution from resolve()
-         *
-         * Instead of taking callbacks from the array they can also be taken
-         * from this call instead. So executeNext() could just as well work
-         * for this .then()
-         *
-         * If the onResolve() parameter doesn't return anything nothing after it
-         * should be executed anyhow.
-         *
-         * So if it return a promise the next .then() call wouldn't execute
-         * onResolve until the last .then() call has concluded. This way a chain
-         * can be started and continued for an already resolved promise. But only
-         * until one of the onResolve() parameters to a .then() call doesn't
-         * return anything
-         */
-        then: function(onResolve, onReject, onNotify) {
-            if (onResolve) {
-                if (state === 'resolved') {
-                    onResolve(resolvedValue);
-                } else {
-                    resolveCallbacks.push(onResolve);
+                    onReject = rejectHandler;
+                    if (rejected) {
+                        onReject(rejection);
+                    }
                 }
             }
+        }
+    }
 
-            if (onReject) {
-                rejectCallbacks.push(onReject);
+    SingleDefer.when = function(value) {
+        var d = new SingleDefer();
+
+        if (value.then) {
+            value.then(function(resolution) {
+                d.resolve(resolution);
+            }, function(error) {
+                d.reject(error);
+            });
+
+            return d.promise;
+        } else {
+            d.resolve(value);
+            return d.promise;
+        }
+    };
+
+    var publicApi = {
+        then: function(onResolve) {
+            if (typeof onResolve === 'function' || (onResolve instanceof Function)) {
+                var q = new SingleDefer();
+
+                onResolves[onResolves.length - 1].promise.then(function(previousValue) {
+                    var onResolveReturn = onResolve(previousValue);
+
+                    if (onResolveReturn) {
+                        SingleDefer.when(onResolveReturn).then(function(currentValue) {
+                            q.resolve(currentValue);
+                        }, function(error) {
+                            reject(error);
+                        });
+                    }
+                });
+
+                onResolves.push(q);
             }
-
-            if (onNotify) {
-                notifyCallbacks.push(onNotify);
-            }
-
-            return publicApi;
-        },
-        'catch': function(onReject) {
-            rejectCallbacks.push(onReject);
-
-            return publicApi;
-        },
-        'finally': function(complete, onNotify) {
-            notifyCallbacks.push(onNotify);
-            finallyCallbacks.push(complete);
 
             return publicApi;
         }
@@ -108,21 +86,10 @@ function Chain() {
 
     return {
         resolve: function(resolution) {
-            resolve(resolution);
+            onResolves[0].resolve(resolution);
         },
-        reject: function(error) {
-            reject(error);
-        },
-
-        isResolved: function() {
-            return state === 'resolved';
-        },
-        isRejected: function() {
-            return state === 'rejected';
-        },
-
         publicApi: publicApi
-    }
+    };
 }
 
 function Deferred(callback) {
@@ -161,6 +128,7 @@ function Deferred(callback) {
         state = 'resolved';
 
         thenChains.forEach(function(chain) {
+            console.log('execute chain', chain);
             chain.resolve(resolution);
         });
     };

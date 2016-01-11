@@ -236,7 +236,6 @@ describe('Promise', function() {
                 });
 
             promise.then(function(value) {
-                console.log('execute me please :(');
                 expect(value).to.equal(originalValue);
                 done();
             });
