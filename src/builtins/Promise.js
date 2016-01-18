@@ -1,158 +1,91 @@
-function Chain() {
-    var state = 'pending';
-    var onResolves = [new SingleDefer()];
-
-    function reject() {}
-
-    function SingleDefer() {
-        var resolved = false;
-        var resolution;
-
-        var rejected = false;
-        var rejection;
-
-        var onResolve = function() {};
-        var onReject = function() {};
-
-        return {
-            resolve: function(value) {
-                resolved = true;
-                resolution = value;
-
-                onResolve(value);
-            },
-            reject: function(error) {
-                rejected = true;
-                rejection = error;
-
-                onReject(error);
-            },
-            promise: {
-                then: function(resolveHandler, rejectHandler) {
-                    onResolve = resolveHandler;
-                    if (resolved) {
-                        onResolve(resolution);
-                    }
-
-                    onReject = rejectHandler;
-                    if (rejected) {
-                        onReject(rejection);
-                    }
-                }
-            }
-        }
-    }
-
-    SingleDefer.when = function(value) {
-        var d = new SingleDefer();
-
-        if (value.then) {
-            value.then(function(resolution) {
-                d.resolve(resolution);
-            }, function(error) {
-                d.reject(error);
-            });
-
-            return d.promise;
-        } else {
-            d.resolve(value);
-            return d.promise;
-        }
-    };
-
-    var publicApi = {
-        then: function(onResolve) {
-            if (typeof onResolve === 'function' || (onResolve instanceof Function)) {
-                var q = new SingleDefer();
-
-                onResolves[onResolves.length - 1].promise.then(function(previousValue) {
-                    var onResolveReturn = onResolve(previousValue);
-
-                    if (onResolveReturn) {
-                        SingleDefer.when(onResolveReturn).then(function(currentValue) {
-                            q.resolve(currentValue);
-                        }, function(error) {
-                            reject(error);
-                        });
-                    }
-                });
-
-                onResolves.push(q);
-            }
-
-            return publicApi;
-        }
-    };
-
-    return {
-        resolve: function(resolution) {
-            onResolves[0].resolve(resolution);
-        },
-        publicApi: publicApi
-    };
+function isFunction(object) {
+    return object && ((typeof object === 'function') && (object instanceof Function));
 }
 
-function Deferred(callback) {
-    var state = 'unresolved';
-    var resolvedValue;
-    var rejectionReason;
-
+function Promise() {
     var resolveCallbacks = [];
     var rejectCallbacks = [];
-    var notifyCallbacks = [];
+    var state = 'pending';
+    var resolution;
+    var rejection;
 
-    var thenChains = [];
+    var api = {
+        then: function(onResolve, onReject) {
+            var promise = new Promise();
 
-    var promise = {
-        then: function(onResolve, onReject, onNotify) {
-            var chain = new Chain();
+            if (((state === 'pending') || (state === 'resolved')) && isFunction(onResolve)) {
+                function resolveWrapper(resolution) {
+                    var returnValue = onResolve(resolution);
 
-            thenChains.push(chain);
+                    if (returnValue && isFunction(returnValue.then)) {
+                        returnValue.then(function(nextResolution) {
+                            promise.resolve(nextResolution);
+                        }, function(nextRejection) {
+                            promise.reject(nextRejection);
+                        });
+                    } else {
+                        promise.resolve(returnValue);
+                    }
+                }
 
-            chain.publicApi.then(onResolve, onReject, onNotify);
-
-            if (state === 'resolved') {
-                chain.resolve(resolvedValue);
+                if (state === 'resolved') {
+                    resolveWrapper(resolution);
+                } else {
+                    resolveCallbacks.push(resolveWrapper);
+                }
             }
 
-            return chain.publicApi;
+            if (((state === 'pending') || (state === 'rejected')) && isFunction(onReject)) {
+                if (state === 'rejected') {
+                    onReject(rejection);
+                    promise.reject(rejection);
+                } else {
+                    rejectCallbacks.push(function() {
+                        onReject(rejection);
+                        promise.reject(rejection);
+                    });
+                }
+            }
+
+            return promise;
+        },
+
+        'catch': function(onReject) {
+            return api.then(null, onReject);
+        },
+
+        reject: function(rejectWith) {
+            rejectCallbacks.forEach(function(callback) {
+                callback(rejectWith);
+            });
+
+            state = 'rejected';
+            rejection = rejectWith;
+        },
+
+        resolve: function(resolveWith) {
+            resolveCallbacks.forEach(function(callback) {
+                callback(resolveWith);
+            });
+
+            state = 'resolved';
+            resolution = resolveWith;
         }
     };
 
-    var resolve = function(resolution) {
-        /*
-         * Store first resolution so future .then() calls will be
-         * resolved immediately
-         */
-        resolvedValue = resolution;
-        state = 'resolved';
+    return api;
+}
 
-        thenChains.forEach(function(chain) {
-            console.log('execute chain', chain);
-            chain.resolve(resolution);
-        });
-    };
-    var reject = function(givenRejectionReason) {
-        state = 'rejected';
-        rejectionReason = givenRejectionReason;
-        rejectCallbacks.forEach(function(callback) {
-            callback(givenRejectionReason);
-        });
-    };
-    var notify = function(notification) {
-        notifyCallbacks.forEach(function(callback) {
-            callback(notification);
-        });
-    };
+function Deferred(init) {
+    var promise = new Promise();
 
-    if (callback) {
-        callback(resolve, reject, notify);
+    if ((typeof init === 'function') || (init instanceof Function)) {
+        init(promise.resolve, promise.reject, promise.notify);
     }
 
     return {
-        resolve: resolve,
-        reject: reject,
-        notify: notify,
+        resolve: promise.resolve,
+        reject: promise.reject,
         promise: promise
     };
 }
