@@ -23,6 +23,7 @@ describe('Promise', function() {
         });
 
         promise.then(function() {
+            done('Promise should not resolve');
         }, function(rejection) {
             expect(rejection).to.equal('test');
             done();
@@ -190,7 +191,6 @@ describe('Promise', function() {
                 noop,
                 function(promiseError) {
                     expect(promiseError).to.equal(error);
-                    done();
                 });
 
             $q.when(otherPromiseNotify,
@@ -227,15 +227,20 @@ describe('Promise', function() {
                 })
                 .then(function(value) {
                     expect(value).to.equal(value1 + value2);
-                    return value + value3;
+
+                    return $q(function(resolve) {
+                        setTimeout(function() {
+                            resolve(value + value3);
+                        }, 200);
+                    });
                 })
                 .then(function(value) {
                     expect(value).to.equal(value1 + value2 + value3);
+                    done();
                 });
 
             promise.then(function(value) {
                 expect(value).to.equal(originalValue);
-                done();
             });
         }
     );
@@ -243,27 +248,21 @@ describe('Promise', function() {
     it('should error out a then-chain if a returned promised is rejected',
         function(done) {
             var q = $q(function(resolve) {
-                console.log('resolve');
                 resolve(1);
             })
                 .then(function(one) {
-                    console.log('getting 1', one);
                     expect(one).to.equal(1);
                     return $q(function(resolve, reject) {
-                        console.log('tootally rejected');
                         reject('rejection');
                     });
                 })
-                .then(function(lol) {
-                    console.log('rofl', 'lol');
+                .then(function() {
+                    done('This .then should be skipped');
                 })
                 .catch(function(error) {
-                    console.log('it errored');
                     expect(error).to.equal('rejection');
                     done();
                 });
-
-            console.log(q);
 
             return q;
         });

@@ -35,15 +35,19 @@ function Promise() {
                 }
             }
 
-            if (((state === 'pending') || (state === 'rejected')) && isFunction(onReject)) {
+            if ((state === 'pending') || (state === 'rejected')) {
+                function rejectionWrapper(rejectWith) {
+                    if (isFunction(onReject)) {
+                        onReject(rejectWith);
+                    }
+
+                    promise.reject(rejectWith);
+                }
+
                 if (state === 'rejected') {
-                    onReject(rejection);
-                    promise.reject(rejection);
+                    rejectionWrapper(rejection);
                 } else {
-                    rejectCallbacks.push(function() {
-                        onReject(rejection);
-                        promise.reject(rejection);
-                    });
+                    rejectCallbacks.push(rejectionWrapper);
                 }
             }
 
@@ -79,7 +83,7 @@ function Promise() {
 function Deferred(init) {
     var promise = new Promise();
 
-    if ((typeof init === 'function') || (init instanceof Function)) {
+    if (isFunction(init)) {
         init(promise.resolve, promise.reject, promise.notify);
     }
 
