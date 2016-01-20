@@ -28,6 +28,5 @@
   having a global $context doesn't make any sense)
 - Write tests for new module ($http, $window, etc)
 - Write tests for non-covered code (use istanbul to find that)
-- Fix promise.then(), chained then's should received previous resolved value
 - Remove babel presets once mimeo is installable via npm
-- Figure out how to handle .then() calls on a resolved chain
+- Add notify() support to Promise-builtin
