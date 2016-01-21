@@ -29,4 +29,3 @@
 - Write tests for new module ($http, $window, etc)
 - Write tests for non-covered code (use istanbul to find that)
 - Remove babel presets once mimeo is installable via npm
-- Add notify() support to Promise-builtin
