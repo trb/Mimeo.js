@@ -5,12 +5,13 @@ function isFunction(object) {
 function Promise() {
     var resolveCallbacks = [];
     var rejectCallbacks = [];
+    var notifyCallbacks = [];
     var state = 'pending';
     var resolution;
     var rejection;
 
     var api = {
-        then: function(onResolve, onReject) {
+        then: function(onResolve, onReject, onNotify) {
             var promise = new Promise();
 
             if (((state === 'pending') || (state === 'resolved')) && isFunction(onResolve)) {
@@ -51,11 +52,25 @@ function Promise() {
                 }
             }
 
+            notifyCallbacks.push(function(notifyWith) {
+                if (isFunction(onNotify)) {
+                    onNotify(notifyWith);
+                }
+
+                promise.notify(notifyWith);
+            });
+
             return promise;
         },
 
         'catch': function(onReject) {
             return api.then(null, onReject);
+        },
+
+        notify: function(notifyWith) {
+            notifyCallbacks.forEach(function(callback) {
+                callback(notifyWith);
+            });
         },
 
         reject: function(rejectWith) {
@@ -90,6 +105,7 @@ function Deferred(init) {
     return {
         resolve: promise.resolve,
         reject: promise.reject,
+        notify: promise.notify,
         promise: promise
     };
 }

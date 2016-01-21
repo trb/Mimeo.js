@@ -120,6 +120,10 @@ describe('Promise', function() {
                     onReject(error);
                 }
             };
+            /*
+             * Last promise to complete, so in this promises handler the
+             * 'done' function is called
+             */
             var otherPromiseNotify = {
                 then: function(_, __, onNotify) {
                     /*
@@ -128,27 +132,38 @@ describe('Promise', function() {
                      */
                     setTimeout(function() {
                         onNotify(notify);
-                    }, 10);
+                    }, 100);
                 }
             };
 
             $q.when(otherPromiseSuccess).then(function(promiseSuccess) {
-                expect(promiseSuccess).to.equal(value);
+                try {
+                    expect(promiseSuccess).to.equal(value);
+                } catch (error) {
+                    done(error);
+                }
             });
 
             $q.when(otherPromiseFailure).then(
                 noop,
                 function(promiseError) {
-                    expect(promiseError).to.equal(error);
-                    done();
+                    try {
+                        expect(promiseError).to.equal(error);
+                    } catch (error) {
+                        done(error);
+                    }
                 });
 
             $q.when(otherPromiseNotify).then(
                 noop,
                 noop,
                 function(promiseNotify) {
-                    expect(promiseNotify).to.equal(error);
-                    done();
+                    try {
+                        expect(promiseNotify).to.equal(notify);
+                        done();
+                    } catch (error) {
+                        done(error);
+                    }
                 });
         }
     );
@@ -197,7 +212,7 @@ describe('Promise', function() {
                 noop,
                 noop,
                 function(promiseNotify) {
-                    expect(promiseNotify).to.equal(error);
+                    expect(promiseNotify).to.equal(notify);
                     done();
                 });
         }
