@@ -1,3 +1,4 @@
+var path = require('path');
 var express = require('express');
 var app = express();
 
@@ -48,6 +49,14 @@ app.get('/messages/:userId', function(request, response) {
 });
 
 app.use(express.static('html'));
+
+/*
+ * Let the app handle routing by directing any non-found requests to the app
+ * entry point
+ */
+app.use(function(request, response) {
+    response.status(404).sendFile(path.resolve(__dirname + '/../html/index.html'));
+});
 
 var server = app.listen(3000, function () {
     var host = server.address().address;
