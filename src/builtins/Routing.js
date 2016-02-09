@@ -4,6 +4,13 @@ var parseUri = require('parseuri');
 function Routing($window) {
     var routing = new RouteRecognizer();
     var defaultRoute;
+    var makeRenderer = function(targetAsDOMNode) {
+        return function(toRender) {
+            if (typeof toRender === 'string' || (toRender instanceof String)) {
+                targetAsDOMNode.innerHTML = toRender;
+            }
+        };
+    };
 
     function preventDefault(event) {
         if (event.preventDefault) {
@@ -57,8 +64,8 @@ function Routing($window) {
         var urlParts = parseUri(url);
         var handlers = routing.recognize(urlParts.path);
         if (handlers) {
-            for (var i=0; i<handlers.length; ++i) {
-               var $context = {
+            for (var i = 0; i < handlers.length; ++i) {
+                var $context = {
                     url: urlParts,
                     params: handlers[i].params,
                     query: queryToDict(urlParts.query)
@@ -119,6 +126,21 @@ function Routing($window) {
         'default': function(newDefaultRoute) {
             defaultRoute = newDefaultRoute;
         },
+        'setMakeRenderer': function(newMakeRenderer) {
+            makeRenderer = newMakeRenderer;
+        },
+        /*
+         * Sets a handler for a route. There can be multiple handlers for any
+         * route.
+         *
+         * A handler is an injectable that will receive three parameters:
+         *
+         * $context - information about the current route and access to url parameters
+         * $renderer - the renderer $routing is configured to use. Default just
+         *      set the html content of the target DOM node
+         * $target - DOM node that the content should end up in. Useful if you
+         *      don't want to use $renderer for a specific route
+         */
         'set': function(route, target, injectable, name) {
             if (!(injectable instanceof Function)) {
                 var message = 'To set a route, you have to provide an injectable that is executable (i.e. instanceof Function). Route: ' + route + ', stringified injectable: "' + String(injectable + '"');
@@ -132,18 +154,19 @@ function Routing($window) {
                 {
                     path: route,
                     handler: function($context) {
-                        var html;
+                        var promise;
                         var targetAsDOMNode = $window.document.getElementById(target);
+                        var renderer = makeRenderer(targetAsDOMNode);
 
                         if (injectable.render) {
-                            html = injectable.render($context, targetAsDOMNode);
+                            promise = injectable.render($context,
+                                renderer,
+                                targetAsDOMNode);
                         } else {
-                            html = injectable($context, targetAsDOMNode);
+                            promise = injectable($context, renderer, targetAsDOMNode);
                         }
 
-                        if (typeof html === 'string' || (html instanceof String)) {
-                            targetAsDOMNode.innerHTML = html;
-                        }
+                        return promise;
                     }
                 }
             ], {'as': name});

@@ -45,7 +45,10 @@ app.get('/messages/:userId', function(request, response) {
         ]
     };
 
-    response.json(messages[request.params.userId]);
+    response.json({
+        to: request.params.userId,
+        messages: messages[request.params.userId]
+    });
 });
 
 app.use(express.static('html'));
