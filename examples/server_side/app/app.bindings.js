@@ -6,6 +6,7 @@ mimeo.module('example-server', [])
     .factory('User', app.User)
     .factory('MessagesForUser', app.MessagesForUser)
     .factory('UsersWithMessagesFactory', app.UsersWithMessagesFactory)
+    .component('WriteMessageComponent', app.WriteMessageComponent)
     .component('UsersWithMessagesComponent', app.UsersWithMessagesComponent)
     .component('WelcomePageComponent', app.WelcomePageComponent)
 ;

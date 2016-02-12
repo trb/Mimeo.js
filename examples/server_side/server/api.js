@@ -26,6 +26,7 @@ app.get('/messages/:userId', function(request, response) {
     var messages = {
         1: [
             {
+                id: 1,
                 from: {
                     id: 2,
                     name: 'Michelle'
@@ -33,12 +34,14 @@ app.get('/messages/:userId', function(request, response) {
                 content: 'Remember to call Jason about BBQ sunday'
             },
             {
+                id: 2,
                 from: 'Unregistered User',
                 content: 'Hi John, this is your mom, I\'m so proud of you'
             }
         ],
         2: [
             {
+                id: 3,
                 from: 'Preston Technologies',
                 content: 'Welcome Aboard! See you Monday at 7.30am'
             }

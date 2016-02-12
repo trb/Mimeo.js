@@ -80,7 +80,7 @@ function UsersWithMessagesComponent() {
                     from = this.props.message.from.name;
                 }
                 return (
-                    <dl>
+                    <dl id={this.props.message.id}>
                         <dt>{ from }</dt>
                         <dd>
                             { this.props.message.content }
@@ -97,7 +97,7 @@ function UsersWithMessagesComponent() {
                         { this.props.user.name }'s messages:
                         <br />
                         {this.props.user.messages.map(function(messageData) {
-                            return <Message message={messageData}/>;
+                            return <Message key={messageData.id} message={messageData}/>;
                         })}
                     </li>
                 );
@@ -112,7 +112,7 @@ function UsersWithMessagesComponent() {
                 return (
                     <ul>
                         {userIds.map(function(userId) {
-                            return <UserMessages user={usersWithMessages[userId]}/>
+                            return <UserMessages key={userId} user={usersWithMessages[userId]}/>
                         })}
                     </ul>
                 );
@@ -136,16 +136,63 @@ function WelcomePageComponent(UsersWithMessagesFactory, UsersWithMessagesCompone
     }
 }
 
+function WriteMessageComponent($q, $http) {
+    var FromField = React.createClass({
+        render: function() {
+            return <input type="text" />;
+        }
+    });
+
+    var ToField = React.createClass({
+        render: function() {
+            return <input type="text" />;
+        }
+    });
+
+    var MessageField = React.createClass({
+        render: function() {
+            return <textarea></textarea>;
+        }
+    });
+
+    var WriteMessageForm = React.createClass({
+        render: function() {
+            return (
+                <form>
+                    <label>From:</label>
+                    <FromField/>
+                    <label>To:</label>
+                    <ToField/>
+                    <label>Message:</label>
+                    <MessageField/>
+                    <button>Send message!</button>
+                </form>
+            );
+        }
+    });
+
+    return function($context, $render) {
+        $render(
+            <WriteMessageForm/>
+        );
+
+        return $q.when(true);
+    }
+}
+
+WriteMessageComponent.$inject = ['$q', '$http'];
+
 WelcomePageComponent.$inject = [
     'UsersWithMessagesFactory',
     'UsersWithMessagesComponent'
 ];
 
-function Routes($routing, WelcomePage) {
+function Routes($routing, WelcomePage, WriteMessageComponent) {
     $routing.set('/', 'app', WelcomePage);
+    $routing.set('/write-message', 'app', WriteMessageComponent);
 }
 
-Routes.$inject = ['$routing', 'WelcomePageComponent'];
+Routes.$inject = ['$routing', 'WelcomePageComponent', 'WriteMessageComponent'];
 
 module.exports = {
     User: User,
@@ -153,5 +200,6 @@ module.exports = {
     UsersWithMessagesFactory: UsersWithMessagesFactory,
     UsersWithMessagesComponent: UsersWithMessagesComponent,
     WelcomePageComponent: WelcomePageComponent,
+    WriteMessageComponent: WriteMessageComponent,
     Routes: Routes
 };
