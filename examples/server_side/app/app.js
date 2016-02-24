@@ -93,13 +93,17 @@ function UsersWithMessagesComponent() {
         var UserMessages = React.createClass({
             render: function() {
                 return (
-                    <li>
-                        { this.props.user.name }'s messages:
-                        <br />
-                        {this.props.user.messages.map(function(messageData) {
-                            return <Message key={messageData.id} message={messageData}/>;
-                        })}
-                    </li>
+                    <div className="panel panel-default">
+                        <div className="panel-heading">
+                            { this.props.user.name }'s messages:
+                        </div>
+                        <div className="panel-body">
+                            {this.props.user.messages.map(function(messageData) {
+                                return <Message key={messageData.id}
+                                                message={messageData}/>;
+                            })}
+                        </div>
+                    </div>
                 );
             }
         });
@@ -110,11 +114,12 @@ function UsersWithMessagesComponent() {
                 var usersWithMessages = this.props.usersWithMessages;
 
                 return (
-                    <ul>
+                    <div>
                         {userIds.map(function(userId) {
-                            return <UserMessages key={userId} user={usersWithMessages[userId]}/>
+                            return <UserMessages key={userId}
+                                                 user={usersWithMessages[userId]}/>
                         })}
-                    </ul>
+                    </div>
                 );
             }
         });
@@ -123,7 +128,9 @@ function UsersWithMessagesComponent() {
     };
 }
 
-function WelcomePageComponent(UsersWithMessagesFactory, UsersWithMessagesComponent) {
+function WelcomePageComponent(
+    UsersWithMessagesFactory,
+    UsersWithMessagesComponent) {
     return function($context, $render) {
         var usersWithMessages = UsersWithMessagesFactory();
         var UserWithMessages = UsersWithMessagesComponent();
@@ -139,33 +146,59 @@ function WelcomePageComponent(UsersWithMessagesFactory, UsersWithMessagesCompone
 function WriteMessageComponent($q, $http) {
     var FromField = React.createClass({
         render: function() {
-            return <input type="text" />;
+            return (
+                <div className="form-group">
+                    <label htmlFor="from">From:</label>
+                    <input id="from"
+                           className="form-control"
+                           type="text"
+                           placeholder="Your name"/>
+                </div>
+            );
         }
     });
 
     var ToField = React.createClass({
         render: function() {
-            return <input type="text" />;
+            return (
+                <div className="form-group">
+                    <label htmlFor="to">To:</label>
+                    <input id="to"
+                           className="form-control"
+                           type="text"
+                           placeholder="Recipients name"/>
+                </div>
+            );
         }
     });
 
     var MessageField = React.createClass({
         render: function() {
-            return <textarea></textarea>;
+            return (
+                <div className="form-group">
+                    <label htmlFor="Message">Message</label>
+                    <textarea id="message"
+                              className="form-control"
+                              placeholder="Your message"></textarea>
+                </div>
+            );
         }
     });
 
     var WriteMessageForm = React.createClass({
+        saveMessage: function(event) {
+            event.preventDefault();
+            console.log(event);
+        },
         render: function() {
             return (
-                <form>
-                    <label>From:</label>
+                <form onSubmit={this.saveMessage}>
                     <FromField/>
-                    <label>To:</label>
                     <ToField/>
-                    <label>Message:</label>
                     <MessageField/>
-                    <button>Send message!</button>
+                    <button type="submit" className="btn btn-primary">Send
+                        message!
+                    </button>
                 </form>
             );
         }
