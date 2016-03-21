@@ -10,6 +10,7 @@
     "server:restart": "npm run server:stop; npm run server:start",
     "build:dev": "node_modules/.bin/browserify browser.js -o html/assets/app.compiled.js --debug -t [ babelify ]",
     "build:production": "NODE_ENV=production node_modules/.bin/browserify browser.js -t [ babelify ] -t envify -g uglifyify -o html/assets/app.min.js",
+    "watch:dev": "node_modules/.bin/watchify browser.js -o html/assets/app.compiled.js --debug -t [ babelify ]",
     "cli": "node_modules/.bin/babel-node --debug ./cli.js"
   },
   "dependencies": {
@@ -22,7 +23,9 @@
     "babel-preset-es2015": "6.3.13",
     "babel-preset-react": "6.3.13",
     "babelify": "7.2.0",
-    "browserify": "12.0.1"
+    "body-parser": "1.15.0",
+    "browserify": "12.0.1",
+    "watchify": "3.7.0"
   },
   "author": "Thomas Rubbert",
   "license": "MIT"

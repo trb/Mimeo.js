@@ -1,7 +1,7 @@
 var RouteRecognizer = require('route-recognizer');
 var parseUri = require('parseuri');
 
-function Routing($window) {
+function Routing($q, $window) {
     var routing = new RouteRecognizer();
     var defaultRoute;
     var makeRenderer = function(targetAsDOMNode) {
@@ -45,8 +45,10 @@ function Routing($window) {
     function doDefaultRoute(route) {
         if (route) {
             $window.history.pushState(null, '', route);
-            doRouting(route, false);
+            return doRouting(route, false);
         }
+
+        return $q.when(false);
     }
 
     function queryToDict(query) {
@@ -63,6 +65,7 @@ function Routing($window) {
     function doRouting(url, doDefault) {
         var urlParts = parseUri(url);
         var handlers = routing.recognize(urlParts.path);
+        var promises = [];
         if (handlers) {
             for (var i = 0; i < handlers.length; ++i) {
                 var $context = {
@@ -71,18 +74,20 @@ function Routing($window) {
                     query: queryToDict(urlParts.query)
                 };
 
-                handlers[i].handler($context);
+                promises.push(handlers[i].handler($context));
             }
         } else if (doDefault !== false) {
-            doDefaultRoute(defaultRoute);
+            promises.push(doDefaultRoute(defaultRoute));
         }
+
+        return $q.all(promises);
     }
 
     function gotoRoute(route) {
         $window.history.pushState(null,
             '',
             route);
-        doRouting(route);
+        return doRouting(route);
     }
 
     function replaceRoute(route) {
@@ -90,7 +95,7 @@ function Routing($window) {
             '',
             route);
 
-        doRouting(route);
+        return doRouting(route);
     }
 
     $window.onpopstate = function() {
@@ -154,25 +159,25 @@ function Routing($window) {
                 {
                     path: route,
                     handler: function($context) {
-                        var promise;
+                        var renderReturn;
                         var targetAsDOMNode = $window.document.getElementById(target);
                         var renderer = makeRenderer(targetAsDOMNode);
 
                         if (injectable.render) {
-                            promise = injectable.render($context,
+                            renderReturn = injectable.render($context,
                                 renderer,
                                 targetAsDOMNode);
                         } else {
-                            promise = injectable($context, renderer, targetAsDOMNode);
+                            renderReturn = injectable($context, renderer, targetAsDOMNode);
                         }
 
-                        return promise;
+                        return $q.when(renderReturn);
                     }
                 }
             ], {'as': name});
         },
         'goto': function(route) {
-            gotoRoute(route);
+            return gotoRoute(route);
         }
     }
 }

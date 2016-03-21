@@ -11,6 +11,9 @@ function Window() {
             onpopstate: noOp,
             onclick: noOp,
             onload: noOp,
+            document: {
+                getElementById: noOp
+            },
             history: {
                 pushState: noOp,
                 replaceState: noOp
@@ -28,7 +31,7 @@ module.exports = function(injectables) {
     injectables.add(Window);
 
     Routing.Routing.$name = '$routing';
-    Routing.Routing.$inject = ['$window'];
+    Routing.Routing.$inject = ['$q', '$window'];
 
     injectables.add(Routing.Routing);
 

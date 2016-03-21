@@ -136,14 +136,14 @@ function WelcomePageComponent(
         var UserWithMessages = UsersWithMessagesComponent();
 
         return usersWithMessages.then(function(data) {
-            $render(
+            return $render(
                 <UserWithMessages usersWithMessages={data}/>
             );
         });
     }
 }
 
-function WriteMessageComponent($q, $http) {
+function WriteMessageComponent($q, $http, $routing) {
     var FromField = React.createClass({
         render: function() {
             return (
@@ -151,6 +151,8 @@ function WriteMessageComponent($q, $http) {
                     <label htmlFor="from">From:</label>
                     <input id="from"
                            className="form-control"
+                           value={this.props.value}
+                           onChange={this.props.onChange}
                            type="text"
                            placeholder="Your name"/>
                 </div>
@@ -165,6 +167,8 @@ function WriteMessageComponent($q, $http) {
                     <label htmlFor="to">To:</label>
                     <input id="to"
                            className="form-control"
+                           value={this.props.value}
+                           onChange={this.props.onChange}
                            type="text"
                            placeholder="Recipients name"/>
                 </div>
@@ -179,23 +183,103 @@ function WriteMessageComponent($q, $http) {
                     <label htmlFor="Message">Message</label>
                     <textarea id="message"
                               className="form-control"
+                              value={this.props.value}
+                              onChange={this.props.onChange}
                               placeholder="Your message"></textarea>
                 </div>
             );
         }
     });
 
-    var WriteMessageForm = React.createClass({
-        saveMessage: function(event) {
-            event.preventDefault();
-            console.log(event);
-        },
+    var Error = React.createClass({
         render: function() {
             return (
+                <div className="alert alert-danger">
+                    {this.props.message}
+                </div>
+            )
+        }
+    });
+
+    var WriteMessageForm = React.createClass({
+        getInitialState: function() {
+            return {
+                error: false,
+                errorMessage: '',
+                to: '',
+                from: '',
+                message: ''
+            }
+        },
+        saveMessage: function(event) {
+            event.preventDefault();
+
+            var error = false;
+            var errorMessage = '';
+
+            if (!this.state.to || this.state.to.length < 1) {
+                error = true;
+                errorMessage += 'Please enter a recipient\n';
+            }
+            if (!this.state.from || this.state.from.length < 1) {
+                error = true;
+                errorMessage += 'Please enter a sender\n';
+            }
+            if (!this.state.message || this.state.message.length < 1) {
+                error = true;
+                errorMessage += 'Please enter a message\n';
+            }
+
+            if (error) {
+                this.setState({
+                    error: true,
+                    errorMessage: errorMessage
+                });
+
+                return;
+            }
+
+            $http.post('/messages', {
+                params: {
+                    to: this.state.to,
+                    from: this.state.from,
+                    message: this.state.message
+                }
+            })
+                .then(function(response) {
+                    $routing.goto('/');
+                });
+        },
+        updateTo: function(event) {
+            this.setState({
+                to: event.target.value
+            });
+        },
+        updateFrom: function(event) {
+            this.setState({
+                from: event.target.value
+            });
+        },
+        updateMessage: function(event) {
+            this.setState({
+                message: event.target.value
+            });
+        },
+        render: function() {
+            var error;
+
+            if (this.state.error && this.state.errorMessage) {
+                error = <Error message={this.state.errorMessage}/>;
+            }
+
+            return (
                 <form onSubmit={this.saveMessage}>
-                    <FromField/>
-                    <ToField/>
-                    <MessageField/>
+                    {error}
+                    <FromField value={this.state.from}
+                               onChange={this.updateFrom}/>
+                    <ToField value={this.state.to} onChange={this.updateTo}/>
+                    <MessageField value={this.state.message}
+                                  onChange={this.updateMessage}/>
                     <button type="submit" className="btn btn-primary">Send
                         message!
                     </button>
@@ -205,15 +289,13 @@ function WriteMessageComponent($q, $http) {
     });
 
     return function($context, $render) {
-        $render(
+        return $render(
             <WriteMessageForm/>
         );
-
-        return $q.when(true);
     }
 }
 
-WriteMessageComponent.$inject = ['$q', '$http'];
+WriteMessageComponent.$inject = ['$q', '$http', '$routing'];
 
 WelcomePageComponent.$inject = [
     'UsersWithMessagesFactory',

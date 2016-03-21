@@ -10,8 +10,8 @@ function EntryPoint($routing) {
         $routing.default('/');
         $routing.setMakeRenderer(function(targetDOMNode) {
             return function(reactNode) {
-                ReactDOM.render(reactNode, targetDOMNode);
-            }
+                return ReactDOM.render(reactNode, targetDOMNode);
+            };
         });
     }
 }
