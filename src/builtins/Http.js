@@ -78,41 +78,92 @@ function nodeRequest(config, resolve, reject) {
         }
     }
 
-    var request = switchByProtocol().request(configToNode(config), function(response) {
-        response.setEncoding('utf8');
+    function formEncode(object) {
+        return Object
+            .keys(object)
+            .map(function(key) {
+                return encodeURIComponent(key) + '=' + encodeURIComponent(object[key]);
+            })
+            .join('&');
+    }
 
-        var body = '';
-        response.on('data', function(chunk) {
-            body += chunk.toString();
-        });
+    function jsonEncode(object) {
+        return JSON.stringify(object);
+    }
 
-        response.on('error', function(error) {
-            reject(error);
-        });
+    function isJsonContentType(contentType) {
+        if (!contentType) {
+            return false;
+        }
 
-        response.on('end', function() {
-            /*
-             * jQuery will parse JSON replies automatically, so replicate that
-             * behaviour for nodejs
-             */
-            if (body && response.headers['content-type'] && response.headers['content-type'].match(/^application\/json/i)) {
-                body = JSON.parse(body);
-            }
+        if (contentType == 'application/x-www-form-urlencoded') {
+            return false;
+        }
 
-            resolve({
-                data: body,
-                headers: response.headers,
-                config: config,
-                statusText: response.statusText,
-                status: response.statusCode
+        function startsWith(string, start) {
+            return string.substr(0, start.length) == start;
+        }
+
+        var textJson = 'text/json';
+        var applicationJson = 'application/json';
+
+        var type = contentType.toLowerCase().trim();
+
+        if (startsWith(type, textJson)) {
+            return true;
+        }
+        if (startsWith(type, applicationJson)) {
+            return true;
+        }
+        if (type.match(/^application\/vnd\..*\+json$/)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    var request = switchByProtocol().request(configToNode(config),
+        function(response) {
+            response.setEncoding('utf8');
+
+            var body = '';
+            response.on('data', function(chunk) {
+                body += chunk.toString();
+            });
+
+            response.on('error', function(error) {
+                reject(error);
+            });
+
+            response.on('end', function() {
+                /*
+                 * jQuery will parse JSON replies automatically, so replicate that
+                 * behaviour for nodejs
+                 */
+                if (body && response.headers['content-type']) {
+                    var type = response.headers['content-type'].toLowerCase().trim();
+
+                    if (isJsonContentType(type)) {
+                        body = JSON.parse(body);
+                    }
+                }
+
+                resolve({
+                    data: body,
+                    headers: response.headers,
+                    config: config,
+                    statusText: response.statusText,
+                    status: response.statusCode
+                });
             });
         });
-    });
 
-    if (config.method === 'POST') {
-        request.write(Object.keys(config.params).map(function(key) {
-            return encodeURIComponent(key) + '=' + encodeURIComponent(config.params[key]);
-        }).join('&'));
+    if (config.method === 'POST' || config.method === 'PUT' || config.method === 'PATCH') {
+        if (isJsonContentType(config.contentType)) {
+            request.write(jsonEncode(config.params));
+        } else {
+            request.write(formEncode(config.params));
+        }
     }
 
     request.end();
