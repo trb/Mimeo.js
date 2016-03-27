@@ -24,11 +24,37 @@ function Window() {
     return window;
 }
 
+function NodeHttp() {
+    if (typeof window === 'undefined') {
+        return require('http');
+    } else {
+        return {};
+    }
+}
+
+function NodeHttps() {
+    if (typeof window === 'undefined') {
+        return require('https');
+    } else {
+        return {};
+    }
+}
+
 module.exports = function(injectables) {
     Window.$name = '$window';
     Window.$inject = [];
 
     injectables.add(Window);
+
+    NodeHttp.$name = '$nodeHttp';
+    NodeHttp.$inject = [];
+
+    injectables.add(NodeHttp);
+
+    NodeHttps.$name = '$nodeHttps';
+    NodeHttps.$inject = [];
+
+    injectables.add(NodeHttps);
 
     Routing.Routing.$name = '$routing';
     Routing.Routing.$inject = ['$q', '$window'];
@@ -41,6 +67,6 @@ module.exports = function(injectables) {
     injectables.add(Promise);
 
     Http.$name = '$http';
-    Http.$inject = ['$window'];
+    Http.$inject = ['$window', '$q', '$nodeHttp', '$nodeHttps'];
     injectables.add(Http);
 };

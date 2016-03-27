@@ -1,7 +1,20 @@
-var Promise = require('./Promise.js');
+var NodeHttp;
+var NodeHttps;
 
-var NodeHttp = null;
-var NodeHttps = null;
+function toQuery(object) {
+    return Object.keys(object).map((key) => {
+        if (Object.prototype.toString.call(object[key]) == '[object Array]') {
+            return object[key]
+                .map((arrayValue) => encodeURI(key) + '=' + encodeURI(arrayValue))
+                .join('&');
+        } else if (Object.prototype.toString.call(object[key]) == '[object Object]') {
+            return encodeURI(key) + '=' + encodeURI(JSON.stringify(object[key]));
+        } else {
+            return encodeURI(key) + '=' + encodeURI(object[key].toString());
+        }
+    })
+        .join('&');
+}
 
 function jQueryLikeRequest(jQueryLike, config, resolve, reject) {
     function responseToAngularResponse(data, _, jqXHR) {
@@ -23,10 +36,10 @@ function jQueryLikeRequest(jQueryLike, config, resolve, reject) {
     }
 
     jQueryLike.ajax({
-        method: config.method || 'GET',
-        data: config.params || {},
-        headers: config.headers || {},
-        url: config.url || {}
+        method: config.method,
+        headers: config.headers,
+        url: config.url,
+        data: config.data
     }).then(success, error);
 }
 
@@ -43,13 +56,6 @@ function zeptoRequest($window) {
 }
 
 function nodeRequest(config, resolve, reject) {
-    if (!NodeHttp) {
-        NodeHttp = require('http');
-    }
-    if (!NodeHttps) {
-        NodeHttps = require('https');
-    }
-
     function configToNode(config) {
         if (config.host && config.host.indexOf(':') !== -1) {
             var hostParts = config.host.split(':');
@@ -57,13 +63,17 @@ function nodeRequest(config, resolve, reject) {
             var port = hostParts[1];
         } else {
             var host = config.host;
-            var port = 80;
+            var port = '80';
+        }
+
+        if (!host) {
+            throw new Error('When using nodes http libraries, you have to set $http.$host, otherwise node does not know where to send the request to');
         }
 
         return {
-            method: config.method || 'GET',
+            method: config.method,
             path: config.protocol + '://' + config.host + config.url,
-            headers: config.headers || {},
+            headers: config.headers,
             host: host,
             port: port,
             protocol: config.protocol + ':'
@@ -76,15 +86,6 @@ function nodeRequest(config, resolve, reject) {
         } else {
             return NodeHttps;
         }
-    }
-
-    function formEncode(object) {
-        return Object
-            .keys(object)
-            .map(function(key) {
-                return encodeURIComponent(key) + '=' + encodeURIComponent(object[key]);
-            })
-            .join('&');
     }
 
     function jsonEncode(object) {
@@ -159,10 +160,12 @@ function nodeRequest(config, resolve, reject) {
         });
 
     if (config.method === 'POST' || config.method === 'PUT' || config.method === 'PATCH') {
-        if (isJsonContentType(config.contentType)) {
-            request.write(jsonEncode(config.params));
-        } else {
-            request.write(formEncode(config.params));
+        if (config.data) {
+            if (isJsonContentType(config.contentType)) {
+                request.write(jsonEncode(config.data));
+            } else {
+                request.write(config.data);
+            }
         }
     }
 
@@ -196,8 +199,21 @@ function vendorSpecificRequest($window) {
  * @returns {promise|*|r.promise|Function|a}
  * @constructor
  */
-function Http($window, config) {
-    var defer = Promise().defer();
+function Http($window, $q, config) {
+    var defer = $q.defer();
+
+    if (config.params) {
+        if (config.url.indexOf('?') == -1) {
+            config.url += '?';
+        } else {
+            if (config.url[config.url - 1] != '&') {
+                config.url += '&';
+            }
+        }
+
+        config.url += toQuery(config.params);
+        delete config.params;
+    }
 
     vendorSpecificRequest($window)(config, function(data) {
         defer.resolve(data);
@@ -208,44 +224,91 @@ function Http($window, config) {
     return defer.promise;
 }
 
-module.exports = function($window) {
+module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
+    NodeHttp = $nodeHttp;
+    NodeHttps = $nodeHttps;
+
     function doHttp(config) {
+        config = mergeConfig(doHttp.$config, config);
         config.host = doHttp.$host;
         config.protocol = doHttp.$protocol;
-        return new Http($window, config);
+        return new Http($window, $q, config);
+    }
+
+    function mergeConfig(defaultConfig, userConfig) {
+        Object.keys(userConfig).forEach((key) => {
+            if (userConfig[key].toString() == '[object Object]') {
+                defaultConfig[key] = mergeConfig(defaultConfig[key],
+                    userConfig[key]);
+            } else {
+                defaultConfig[key] = userConfig[key];
+            }
+        });
+
+        return defaultConfig;
     }
 
     doHttp.$host = '';
     doHttp.$protocol = 'https';
+    doHttp.$config = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
 
-    doHttp.get = function(url, config) {
-        config = config || {};
+    doHttp.get = function(url, params, config) {
+        config = mergeConfig(doHttp.$config, config || {});
         config.url = url;
         config.method = 'GET';
+        config.params = params;
         config.protocol = doHttp.$protocol;
         config.host = doHttp.$host;
-        return Http($window, config);
+        return new Http($window, $q, config);
     };
-    doHttp.post = function(url, config) {
+    doHttp.head = function(url, params, config) {
+        config = mergeConfig(doHttp.$config, config || {});
+        config.url = url;
+        config.method = 'HEAD';
+        config.params = params;
+        config.protocol = doHttp.$protocol;
+        config.host = doHttp.$host;
+        return new Http($window, $q, config);
+    };
+    doHttp.post = function(url, data, config) {
+        config = mergeConfig(doHttp.$config, config || {});
         config.url = url;
         config.method = 'POST';
+        config.data = data;
         config.protocol = doHttp.$protocol;
         config.host = doHttp.$host;
-        return Http($window, config);
+        return new Http($window, $q, config);
     };
-    doHttp.put = function(url, config) {
+    doHttp.put = function(url, data, config) {
+        config = mergeConfig(doHttp.$config, config || {});
         config.url = url;
         config.method = 'PUT';
+        config.data = data;
         config.protocol = doHttp.$protocol;
         config.host = doHttp.$host;
-        return Http($window, config);
+        return new Http($window, $q, config);
+    };
+    doHttp.patch = function(url, data, config) {
+        config = mergeConfig(doHttp.$config, config || {});
+        config.url = url;
+        config.method = 'PATCH';
+        config.data = data;
+        config.protocol = doHttp.$protocol;
+        config.host = doHttp.$host;
+        return new Http($window, $q, config);
     };
     doHttp.delete = function(url, config) {
+        config = mergeConfig(doHttp.$config, config || {});
         config.url = url;
         config.method = 'DELETE';
         config.protocol = doHttp.$protocol;
         config.host = doHttp.$host;
-        return Http($window, config);
+        return new Http($window, $q, config);
     };
 
     return doHttp;
