@@ -6,9 +6,7 @@ function Routing($q, $window) {
     var defaultRoute;
     var makeRenderer = function(targetAsDOMNode) {
         return function(toRender) {
-            if (typeof toRender === 'string' || (toRender instanceof String)) {
-                targetAsDOMNode.innerHTML = toRender;
-            }
+            targetAsDOMNode.innerHTML = toRender;
         };
     };
 
@@ -43,12 +41,8 @@ function Routing($q, $window) {
     }
 
     function doDefaultRoute(route) {
-        if (route) {
-            $window.history.pushState(null, '', route);
-            return doRouting(route, false);
-        }
-
-        return $q.when(false);
+        $window.history.pushState(null, '', route);
+        return doRouting(route, false);
     }
 
     function queryToDict(query) {
@@ -76,7 +70,7 @@ function Routing($q, $window) {
 
                 promises.push(handlers[i].handler($context));
             }
-        } else if (doDefault !== false) {
+        } else if ((doDefault !== false) && defaultRoute) {
             promises.push(doDefaultRoute(defaultRoute));
         }
 
@@ -128,10 +122,18 @@ function Routing($q, $window) {
     };
 
     return {
-        'default': function(newDefaultRoute) {
+        'setDefaultRoute': function(newDefaultRoute) {
+            if (!((typeof newDefaultRoute === 'string') || newDefaultRoute instanceof String)) {
+                throw new Error('The default route must be given as a string, e.g. "/app"');
+            }
+
             defaultRoute = newDefaultRoute;
         },
         'setMakeRenderer': function(newMakeRenderer) {
+            if (!(newMakeRenderer instanceof Function)) {
+                throw new Error('The makeRenderer must be a function');
+            }
+
             makeRenderer = newMakeRenderer;
         },
         /*

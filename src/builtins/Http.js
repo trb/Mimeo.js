@@ -153,15 +153,16 @@ function nodeRequest(config, resolve, reject) {
                     data: body,
                     headers: response.headers,
                     config: config,
-                    statusText: response.statusText,
+                    statusText: response.statusMessage,
                     status: response.statusCode
                 });
             });
-        });
+        }
+    );
 
     if (config.method === 'POST' || config.method === 'PUT' || config.method === 'PATCH') {
         if (config.data) {
-            if (isJsonContentType(config.contentType)) {
+            if (isJsonContentType(config.headers['Content-Type'])) {
                 request.write(jsonEncode(config.data));
             } else {
                 request.write(config.data);
@@ -181,7 +182,7 @@ function vendorSpecificRequest($window) {
         } else if ($window.Zepto) {
             return zeptoRequest($window);
         } else {
-            throw new Error('No supported ajax library found (jQuery or Zepto)');
+            throw new Error('No supported xhr library found (jQuery or Zepto are supported)');
         }
     }
 }
@@ -195,6 +196,7 @@ function vendorSpecificRequest($window) {
  * url: URL to request
  *
  * @param $window
+ * @param $q
  * @param config
  * @returns {promise|*|r.promise|Function|a}
  * @constructor
@@ -203,10 +205,10 @@ function Http($window, $q, config) {
     var defer = $q.defer();
 
     if (config.params) {
-        if (config.url.indexOf('?') == -1) {
+        if (config.url.indexOf('?') === -1) {
             config.url += '?';
         } else {
-            if (config.url[config.url - 1] != '&') {
+            if (config.url[config.url.length - 1] != '&') {
                 config.url += '&';
             }
         }

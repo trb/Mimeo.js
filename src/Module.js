@@ -53,17 +53,17 @@ function Module(injectables, name, dependencies) {
      * injectables (or at least IDs) is a core aspect of an injection system.
      *
      * So this would have to live outside of it. But that means having it's own
-     * "make sure all this injectables" exist system. Then we could just get the
-     * named injectables the run-function needs and call the run-function with
-      * those.
-      *
-      * I can't think of a good way to de-duplicated that dependency resolution
-      * system though, so there'd be one for all named injectables and one for
-      * the run-functions.
-      *
-      * I don't plan on having other unnamed injectables, so I feel that effort
-      * would be wasted. Hence the "hack" here with an auto-generated name and
-      * a wrapper that executes the run-function with pass-through arguments.
+     * "make sure all these injectables exist" system. Then we could just get
+     * the named injectables the run-function needs and call the run-function
+     * with those.
+     *
+     * I can't think of a good way to de-duplicated that dependency resolution
+     * system though, so there'd be one for all named injectables and one for
+     * the run-functions.
+     *
+     * I don't plan on having other unnamed injectables, so I feel that effort
+     * would be wasted. Hence the "hack" here with an auto-generated name and
+     * a wrapper that executes the run-function with pass-through arguments.
      */
     this.run = function(parameters) {
         var name = module.$name + '-run.' + toRun.length;
@@ -87,9 +87,7 @@ function Module(injectables, name, dependencies) {
             provider.$inject = parameters.slice(0, -1);
         }
 
-        addInjectable(name, provider);
-
-        return module;
+        return addInjectable(name, provider);
     };
 
     this.factory = addInjectable;

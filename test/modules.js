@@ -41,6 +41,7 @@ describe('Modules', function() {
         modules.add(m);
 
         expect(modules.hasAllDependencies()).to.be.false;
+        expect(modules.getMissingDependencies()).to.deep.equal(['does-not-exist']);
     });
 
     it('should instantiate when all dependencies are met', function() {

@@ -14,9 +14,7 @@ module.exports = function() {
 
     function instantiateModules() {
         modules.all.providers(function(_, module) {
-            if (module) {
-                module.executeRun();
-            }
+            module.executeRun();
         });
     }
 

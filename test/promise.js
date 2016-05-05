@@ -94,6 +94,31 @@ describe('Promise', function() {
         defer2.resolve(testValue2);
     });
 
+    it('should reject immediately if any promise is rejected', function(done) {
+        var defer1 = $q.defer();
+        var defer2 = $q.defer();
+        var defer3 = $q.defer();
+
+        $q.all([
+            defer1.promise,
+            defer2.promise,
+            defer3.promise
+        ]).then(() => {}, (rejection) => {
+            expect(rejection).to.equal('test-rejection');
+            done();
+        });
+
+        defer2.reject('test-rejection');
+    });
+
+    it('should throw error when passing non-array to $q.all', function() {
+        var defer1 = $q.defer();
+        var defer2 = $q.defer();
+
+        expect(() => $q.all(defer1.promise, defer2.promise)).to.throw(
+            '$q.all in an array');
+    });
+
     it('should resolve value with .when', function(done) {
         var value = 123;
         $q.when(value).then(function(thenValue) {
@@ -280,5 +305,6 @@ describe('Promise', function() {
                 });
 
             return q;
-        });
+        }
+    );
 });

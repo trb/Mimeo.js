@@ -1,60 +1,23 @@
 var Promise = require('./Promise.js');
 var Routing = require('./Routing.js');
 var Http = require('./Http.js');
-
-function Window() {
-    if (typeof window === 'undefined') {
-        var noOp = function() {
-        };
-        return {
-            $fake: true,
-            onpopstate: noOp,
-            onclick: noOp,
-            onload: noOp,
-            document: {
-                getElementById: noOp
-            },
-            history: {
-                pushState: noOp,
-                replaceState: noOp
-            }
-        };
-    }
-
-    return window;
-}
-
-function NodeHttp() {
-    if (typeof window === 'undefined') {
-        return require('http');
-    } else {
-        return {};
-    }
-}
-
-function NodeHttps() {
-    if (typeof window === 'undefined') {
-        return require('https');
-    } else {
-        return {};
-    }
-}
+var GlobalsWrapper = require('./GlobalsWrapper.js');
 
 module.exports = function(injectables) {
-    Window.$name = '$window';
-    Window.$inject = [];
+    GlobalsWrapper.Window.$name = '$window';
+    GlobalsWrapper.Window.$inject = [];
 
-    injectables.add(Window);
+    injectables.add(GlobalsWrapper.Window);
 
-    NodeHttp.$name = '$nodeHttp';
-    NodeHttp.$inject = [];
+    GlobalsWrapper.NodeHttp.$name = '$nodeHttp';
+    GlobalsWrapper.NodeHttp.$inject = [];
 
-    injectables.add(NodeHttp);
+    injectables.add(GlobalsWrapper.NodeHttp);
 
-    NodeHttps.$name = '$nodeHttps';
-    NodeHttps.$inject = [];
+    GlobalsWrapper.NodeHttps.$name = '$nodeHttps';
+    GlobalsWrapper.NodeHttps.$inject = [];
 
-    injectables.add(NodeHttps);
+    injectables.add(GlobalsWrapper.NodeHttps);
 
     Routing.Routing.$name = '$routing';
     Routing.Routing.$inject = ['$q', '$window'];

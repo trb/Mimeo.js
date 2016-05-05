@@ -14,7 +14,8 @@ function Promise() {
         then: function(onResolve, onReject, onNotify) {
             var promise = new Promise();
 
-            if (((state === 'pending') || (state === 'resolved')) && isFunction(onResolve)) {
+            if (((state === 'pending') || (state === 'resolved')) && isFunction(
+                    onResolve)) {
                 function resolveWrapper(resolution) {
                     var returnValue = onResolve(resolution);
 
@@ -139,23 +140,18 @@ $q.resolve = $q.when = function(value, onResolve, onReject, onNotify) {
 };
 
 $q.all = function(promises) {
-    if (!promises instanceof Array) {
+    if (!(promises instanceof Array)) {
         throw new Error('Promises need to be passed to $q.all in an array');
     }
 
     var counter = 0;
     var resolutions = [];
-    var hasRejections = false;
 
     var deferred = new Deferred();
 
     function checkComplete() {
         if (counter === promises.length) {
-            if (hasRejections) {
-                deferred.reject();
-            } else {
-                deferred.resolve(resolutions);
-            }
+            deferred.resolve(resolutions);
         }
     }
 
@@ -164,10 +160,8 @@ $q.all = function(promises) {
             resolutions[index] = resolution;
             ++counter;
             checkComplete();
-        }, function() {
-            hasRejections = true;
-            ++counter;
-            checkComplete();
+        }, function(rejection) {
+            deferred.reject(rejection);
         });
     });
 
