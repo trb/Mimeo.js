@@ -71,6 +71,15 @@ describe('Mimeo', function() {
         }
     );
 
+    /*
+     * Due to mimeo.js global nature, all following tests have to remain the order
+     * they're currently written in.
+     */
+    it('should require all module dependencies to be resolved', function() {
+        mimeo.module('user').value('userName', 'Rudy');
+        expect(function() { mimeo.bootstrap('userName'); }).to.throw('is not executable');
+    });
+
     it('should not continue with missing dependencies', function() {
         mimeo.module('test', []).factory('missingDependencies', ['does-not-exist', function() {}]);
 
@@ -79,5 +88,10 @@ describe('Mimeo', function() {
 
     it('should require an injectables name to bootstrap into a string', function() {
         expect(function() { mimeo.bootstrap(); }).to.throw('Define an injectable');
+    });
+
+    it('should require all module dependencies to be resolved', function() {
+        mimeo.module('missingDependencyTest', ['missing']);
+        expect(function() { mimeo.bootstrap('test'); }).to.throw('Modules don\'t exist');
     });
 });

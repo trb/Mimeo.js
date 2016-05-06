@@ -86,5 +86,48 @@ describe('Module', function() {
         };
 
         module.value('value', string);
-    })
+    });
+
+    it('should run accept a function for .run', function() {
+        var injectable;
+        var ranSetup = false;
+        function setup() {
+            ranSetup = true;
+        }
+
+        setup.$inject = [];
+        injectables.add = function(provider) {
+            injectable = provider();
+            expect(provider.$inject).to.equal(setup.$inject);
+        };
+        injectables.get = function() {
+            return injectable;
+        };
+
+        module.run(setup);
+        module.executeRun();
+
+        expect(ranSetup).to.be.true;
+    });
+
+    it('should run accept a function for .run', function() {
+        var injectable;
+        var ranSetup = false;
+        function setup() {
+            ranSetup = true;
+        }
+
+        injectables.add = function(provider) {
+            injectable = provider();
+            expect(provider.$inject).to.deep.equal([]);
+        };
+        injectables.get = function() {
+            return injectable;
+        };
+
+        module.run([setup]);
+        module.executeRun();
+
+        expect(ranSetup).to.be.true;
+    });
 });

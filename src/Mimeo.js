@@ -34,7 +34,7 @@ var Mimeo = function() {
             throw new Error('Injectable "' + injectableName + '" to bootstrap not found. Stringyfied injectable: ' + entryInjectable);
         }
 
-        if (!entryInjectable instanceof Function) {
+        if (!(entryInjectable instanceof Function)) {
             throw new Error('Injectable "' + injectableName + '" is not executable. Stringyfied injectable: ' + String(entryInjectable));
         }
 
