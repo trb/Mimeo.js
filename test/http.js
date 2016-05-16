@@ -266,6 +266,52 @@ describe('Http', function() {
         }
     );
 
+    it('should reset config object between requests',
+        function() {
+            $window.$fake = false;
+            $window.jQuery = {
+                ajax: function(config) {
+                    if (config.type == 'GET') {
+                        expect(config.data).to.be.empty;
+                        /*
+                         * The content type header was set to 'Invalid' in the
+                         * POST response handler and should be re-set to the
+                         * default value for this request. It should not equal
+                         * the value it was set to in the POST response.
+                         */
+                        expect(config.headers['Content-Type']).to.not.equal(
+                            'Invalid');
+                    }
+                    return {
+                        then: (success) => success({a: '1'}, 'success', {
+                            readyState: 'completed',
+                            status: 200,
+                            statusText: 'success',
+                            responseText: '{"a": "1"}',
+                            getAllResponseHeaders: () => {
+                                return {'Content-Type': 'application/json'}
+                            },
+                            getResponseHeader: () => 'application/json',
+                            statusCode: () => 200
+                        })
+                    }
+                }
+            };
+
+            $http.post('/test', {a: 1}).then((response) => {
+                /*
+                 * If the clone of `$http.$config` is not deep, then
+                 * `response.config.headers` will be a dangling reference to the
+                 * default config object (`$http.$config.headers`). Changing the
+                 * header here should NOT change the default config, which we
+                 * can test for in the next request.
+                 */
+                response.config.headers['Content-Type'] = 'Invalid';
+            });
+            $http.get('/test');
+        }
+    );
+
     it('should reject promise if request fails',
         function() {
             $window.$fake = false;

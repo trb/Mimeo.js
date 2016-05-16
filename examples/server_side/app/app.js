@@ -240,11 +240,9 @@ function WriteMessageComponent($q, $http, $routing) {
             }
 
             $http.post('/messages', {
-                params: {
                     to: this.state.to,
                     from: this.state.from,
                     message: this.state.message
-                }
             })
                 .then(function(response) {
                     $routing.goto('/');

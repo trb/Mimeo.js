@@ -5,12 +5,7 @@
 - Focus this example solely on server-side/browser shared code
 - Test with mocha
 
-## Todo example
-- Remove
-
-## Routing example
-- Remove
 
 ## Mimeo
-- Remove babel presets once mimeo is installable via npm
 - Investigate rollup for minification
+- Figure out issues with jQuery for $http when POSTing an object with a json content type

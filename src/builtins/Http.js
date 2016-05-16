@@ -1,3 +1,5 @@
+'use strict';
+
 var NodeHttp;
 var NodeHttps;
 
@@ -14,6 +16,37 @@ function toQuery(object) {
         }
     })
         .join('&');
+}
+
+function isJsonContentType(contentType) {
+    if (!contentType) {
+        return false;
+    }
+
+    if (contentType == 'application/x-www-form-urlencoded') {
+        return false;
+    }
+
+    function startsWith(string, start) {
+        return string.substr(0, start.length) == start;
+    }
+
+    var textJson = 'text/json';
+    var applicationJson = 'application/json';
+
+    var type = contentType.toLowerCase().trim();
+
+    if (startsWith(type, textJson)) {
+        return true;
+    }
+    if (startsWith(type, applicationJson)) {
+        return true;
+    }
+    if (type.match(/^application\/vnd\..*\+json$/)) {
+        return true;
+    }
+
+    return false;
 }
 
 function jQueryLikeRequest(jQueryLike, config, resolve, reject) {
@@ -36,10 +69,11 @@ function jQueryLikeRequest(jQueryLike, config, resolve, reject) {
     }
 
     jQueryLike.ajax({
-        method: config.method,
+        type: config.method,
         headers: config.headers,
+        contentType: config.headers['Content-Type'],
         url: config.url,
-        data: config.data
+        data: isJsonContentType(config.headers['Content-Type']) ? JSON.stringify(config.data) : config.data
     }).then(success, error);
 }
 
@@ -90,37 +124,6 @@ function nodeRequest(config, resolve, reject) {
 
     function jsonEncode(object) {
         return JSON.stringify(object);
-    }
-
-    function isJsonContentType(contentType) {
-        if (!contentType) {
-            return false;
-        }
-
-        if (contentType == 'application/x-www-form-urlencoded') {
-            return false;
-        }
-
-        function startsWith(string, start) {
-            return string.substr(0, start.length) == start;
-        }
-
-        var textJson = 'text/json';
-        var applicationJson = 'application/json';
-
-        var type = contentType.toLowerCase().trim();
-
-        if (startsWith(type, textJson)) {
-            return true;
-        }
-        if (startsWith(type, applicationJson)) {
-            return true;
-        }
-        if (type.match(/^application\/vnd\..*\+json$/)) {
-            return true;
-        }
-
-        return false;
     }
 
     var request = switchByProtocol().request(configToNode(config),
@@ -237,17 +240,31 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
         return new Http($window, $q, config);
     }
 
-    function mergeConfig(defaultConfig, userConfig) {
-        Object.keys(userConfig).forEach((key) => {
-            if (userConfig[key].toString() == '[object Object]') {
-                defaultConfig[key] = mergeConfig(defaultConfig[key],
-                    userConfig[key]);
+    function clone(object) {
+        let newObject = {};
+        Object.keys(object).forEach((key) => {
+            if (object[key].toString() == '[object Object]') {
+                newObject[key] = clone(object[key]);
             } else {
-                defaultConfig[key] = userConfig[key];
+                newObject[key] = object[key];
             }
         });
 
-        return defaultConfig;
+        return newObject;
+    }
+
+    function mergeConfig(defaultConfig, userConfig) {
+        let targetConfig = clone(defaultConfig);
+        Object.keys(userConfig).forEach((key) => {
+            if (userConfig[key].toString() == '[object Object]') {
+                targetConfig[key] = mergeConfig(targetConfig[key],
+                    userConfig[key]);
+            } else {
+                targetConfig[key] = userConfig[key];
+            }
+        });
+
+        return targetConfig;
     }
 
     doHttp.$host = '';

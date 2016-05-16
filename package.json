@@ -6,9 +6,9 @@
   "scripts": {
     "preintegration-test": "./bin/ensure-xvfb-exists.sh",
     "develop": "npm run server:start; npm run watch:development",
-    "watch:development": "node_modules/.bin/watchify src/Mimeo.js -t [ babelify ] -o dev/mimeo.js --no-builtins --debug",
-    "build:development": "node_modules/.bin/browserify src/Mimeo.js -t [ babelify ] -o dev/mimeo.js --no-builtins --debug",
-    "build:production": "node_modules/.bin/browserify src/Mimeo.js -t [ babelify ] -t uglifyify -g uglifyify -o dist/mimeo.js --no-builtins",
+    "watch:development": "node_modules/.bin/watchify src/Mimeo.js -t [ babelify ] -o dist/mimeo.js --no-builtins --debug --standalone mimeo",
+    "build:development": "node_modules/.bin/browserify src/Mimeo.js -t [ babelify ] -o dist/mimeo.js --no-builtins --debug --standalone mimeo",
+    "build:production": "node_modules/.bin/browserify src/Mimeo.js -t [ babelify ] -t uglifyify -g uglifyify -o dist/mimeo.min.js --no-builtins --standalone mimeo",
     "build": "npm run build:development; npm run build:production",
     "coverage": "node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- -R spec",
     "test": "node_modules/.bin/mocha",

@@ -1,3 +1,4 @@
+<!-- Just open this file in your browser, no need to run a web server -->
 <!doctype html>
 <htmlang="">
 <head>
@@ -9,32 +10,79 @@
     <script src="../../dist/mimeo.js"></script>
 </head>
 <body>
-    <span id="greeting">Hello</span><span id="name"></span>!
+    <span id="greeting"></span>!
 
     <script type="text/javascript">
         (function() {
+            /*
+             * It's a good idea to keep your functions separate from the
+             * mimeo definitions. Here `user()` is defined as a function
+             * that needs no injectables (has no dependencies) and returns
+             * a simple object representing a user.
+             */
             function user() {
                 return {
                     name: 'Robert'
                 };
             }
 
+            /*
+             * `sayHi()` will be the component that actually displays the
+             * greeting. It has two dependencies, the greeting itself and
+             * the user to greet. These will be injected by mimeo when
+             * `.bootstrap()` is called. `sayHi()` returns a function that
+             * accepts the element that the greeting will be rendered in.
+             */
             function sayHi(greeting, user) {
                 return function(element) {
-                    document.getElementById('greeting').innerText = greeting;
-                    element.innerText = ' ' + user.name;
+                    element.innerText = greeting + ' ' + user.name;
                 }
             }
 
+            /*
+             * Setting the `$inject` attribute on an injectable is the
+              * recommended way of defining dependencies. `sayHi()` requires
+              * the greeting and the user to greet.
+             */
             sayHi.$inject = ['greeting', 'user'];
 
+            /*
+             * Everything in mimeo needs to be in a module. You define a module
+             * by calling `.module()` with a list of dependencies (which can
+             * be empty).
+             */
             mimeo.module('helloWorld', [])
+            /*
+                     * There are a few methods available on a module to create
+                     * injectables. Injectables can be injected into other
+                     * injectables. `.value()` defines a simple value without
+                     * executing any code. There we define a value for a
+                     * greeting that can be injected with the identifier
+                     * 'greeting'.
+                     */
                     .value('greeting', 'Good day')
+                    /*
+                     * More complex injectables like `.factory()` allow you to
+                     * define a function that will be executed when `.bootstrap()`
+                     * is called. The return value from this function is injected
+                     * wherever the identifier is required (in this case 'user').
+                     */
                     .factory('user', user)
+                    /*
+                     * Components are used to display data to the user. Just like
+                     * factories they are executed when `.bootstrap()` is called
+                     * and can be injected into other injectables.
+                     */
                     .component('sayHi', sayHi);
         })();
 
-        mimeo.bootstrap('sayHi', document.getElementById('name'));
+        /*
+         * Calling `.bootstrap()` will instantiate all injectables. If there are
+         * unmet or circular dependencies, an error will be thrown. After
+         * successful instantiation, the instance of theinjectable called 'sayHi'
+         * will be called with the element with the id 'greeting'.
+         */
+        mimeo.bootstrap('sayHi', document.getElementById('greeting'));
     </script>
 </body>
 </html>

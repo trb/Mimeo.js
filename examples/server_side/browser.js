@@ -7,7 +7,7 @@ var ReactDOM = require('react-dom');
 
 function EntryPoint($routing) {
     return function() {
-        $routing.default('/');
+        $routing.setDefaultRoute('/');
         $routing.setMakeRenderer(function(targetDOMNode) {
             return function(reactNode) {
                 return ReactDOM.render(reactNode, targetDOMNode);
