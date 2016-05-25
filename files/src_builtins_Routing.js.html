@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>src/builtins/Routing.js - Mimeo Public API Documentation</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../mimeo-logo.png" title="Mimeo Public API Documentation"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.0.1</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/$http.html">$http</a></li>
+                                <li><a href="../classes/$q.html">$q</a></li>
+                                <li><a href="../classes/$routing.html">$routing</a></li>
+                                <li><a href="../classes/Deferred.html">Deferred</a></li>
+                                <li><a href="../classes/Mimeo.html">Mimeo</a></li>
+                                <li><a href="../classes/Module.html">Module</a></li>
+                                <li><a href="../classes/Promise.html">Promise</a></li>
+                            </ul>
+                
+                
+                            <ul id="api-modules" class="apis modules">
+                                <li><a href="../modules/Builtins.html">Builtins</a></li>
+                                <li><a href="../modules/Mimeo.html">Mimeo</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1 class="file-heading">File: src/builtins/Routing.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * @module Builtins
+ */
+
+var RouteRecognizer = require(&#x27;route-recognizer&#x27;);
+var parseUri = require(&#x27;parseuri&#x27;);
+
+/**
+ * # Routing for Mimeo
+ *
+ * This builtin handles routing by managing the browsers history and matching
+ * routes with injectables (usually components.)
+ *
+ * The general workflow would be to inject &#x60;$routing&#x60; into a
+ * {{#crossLink &quot;Module/run:method&quot;}}&#x60;.run()&#x60;{{/crossLink}} injectable on your
+ * root module along with the injectables you want to match to the routes, and
+ * {{#crossLink &quot;$routing/set:method&quot;}}define routes there{{/crossLink}}:
+ *
+ *      mimeo.module(&#x27;example&#x27;, [])
+ *          .run([
+ *              &#x27;$routing&#x27;,
+ *              &#x27;usersComponent&#x27;,
+ *              &#x27;loginComponent&#x27;,
+ *              ($routing) =&gt; {
+ *                  $routing.set(&#x27;/users&#x27;, usersComponent);
+ *                  $routing.set(&#x27;/login&#x27;, loginComponent);
+ *              }
+ *          );
+ *
+ * ## Generating output
+ *
+ * How output is generated is up to the matched injectable. Once an injectable
+ * is matched to a route, it is invoked with three parameters:
+ *
+ * - context
+ * - renderer
+ * - targetDOMNode
+ *
+ * Context is an object that contains information about the matched route. See
+ * {{#crossLink &quot;$routing/set:method&quot;}}the &#x60;set&#x60; method for more details
+ * {{/crossLink}}. Renderer is a helper to produce output and can be
+ * configured.
+ * targetDOMNode is the DOM node that was associated with the route.
+ *
+ * Since the injectable has access to the DOM node, it can simply update the
+ * nodes content to produce output. The &#x60;renderer&#x60; is not strictly necessary.
+ * However, when using a rendering library like React, manually calling
+ * ReactDOM.render(exampleComponent, targetDOMNode) is annoying and also makes
+ * it impossible to switch to e.g.
+ * ReactDOMServer.renderToStaticMarkup(exampleComponent) to produce output
+ * in NodeJS.
+ *
+ * Using a renderer has the advantage of being able to change the rendering
+ * method depending on the environment the app is in. Using
+ * {{#crossLink
+ * &quot;$routing/setMakeRenderer:method&quot;}}&#x60;setMakeRenderer&#x60;{{/crossLink}}
+ * to define a default renderer allows the matched injectable to simply call
+ * &#x60;renderer(exampleComponent)&#x60; and not deal with the specifics of generating
+ * output. An example for React:
+ *
+ *      mimeo.module(&#x27;example&#x27;, [])
+ *          // target is not used since the custom renderer will take care of
+ *          // mounting the react node
+ *          .component([&#x27;usersComponent&#x27;, () =&gt; ($context, $render) =&gt; {
+ *              let Users = React.createClass({}); // example component
+ *
+ *              return $render(&lt;Users /&gt;);
+ *          })
+ *          .run([&#x27;$routing&#x27;, &#x27;usersComponent&#x27;, ($routing, usersComponent) =&gt; {
+ *              $routing.setMakeRenderer(function(targetDOMNode) {
+ *                  return function(reactNode) {
+ *                      return ReactDOM.render(reactNode, targetDOMNode);
+ *                  };
+ *              });
+ *
+ *              $routing.set(&#x27;/users&#x27;, usersComponent);
+ *          });
+ *
+ * ## Initiate routing
+ *
+ * There are three ways to change the current route:
+ *
+ * - {{#crossLink &quot;$routing/goto:method&quot;}}goto{{/crossLink}}
+ * - a-tag with a href and a &#x27;data-internal&#x27; attribute
+ * - a-tag with a href, a &#x27;data-internal&#x27; and &#x27;data-no-history&#x27; attribute
+ *
+ * &#x60;.goto()&#x60; is mainly used for server-side rendering. If you set a
+ * {{#crossLink &quot;$routing/setMakeRenderer:method&quot;}}a renderer{{/crossLink}} that
+ * supports server-side output, you won&#x27;t have to change your components to
+ * generate the output. &#x60;.goto()&#x60; will return a promise that is full-filled
+ * with the return value from the component. You can have your server-side
+ * entry-point attach to that promise and then do with the output what you
+ * need (e.g. send an email, save to a static .html file, etc.)
+ *
+ * The other two are simply a-tags in your html. &#x60;$routing&#x60; attaches an event
+ * handler to the document that listens to clicks on a-tags with a
+ * &#x27;data-internal&#x27; attribute. The value from the &#x27;href&#x27; attribute is used as the
+ * route to handle. The &#x27;data-no-history&#x27; attribute controls whether a new
+ * browser-history entry is created. If the attribute is present, no history
+ * is created.
+ *
+ * @class $routing
+ * @static
+ */
+function Routing($q, $window) {
+    var routing = new RouteRecognizer();
+    var defaultRoute;
+    var makeRenderer = function(targetAsDOMNode) {
+        return function(toRender) {
+            targetAsDOMNode.innerHTML = toRender;
+        };
+    };
+
+    function preventDefault(event) {
+        if (event.preventDefault) {
+            event.preventDefault();
+        } else {
+            /*
+             * Internet explorer support
+             */
+            event.returnValue = false;
+        }
+    }
+
+    function getAttribute(element, attribute) {
+        if (element[attribute]) {
+            return element[attribute];
+        }
+
+        if (element.getAttribute) {
+            return element.getAttribute(attribute);
+        }
+
+        var value = null;
+        for (var i = 0; i &lt; element.attributes.length; ++i) {
+            if (element.attributes[i].nodeName === attribute) {
+                value = element.attributes[i].nodeValue;
+            }
+        }
+
+        return value;
+    }
+
+    function doDefaultRoute(route) {
+        $window.history.pushState(null, &#x27;&#x27;, route);
+        return doRouting(route, false);
+    }
+
+    function queryToDict(query) {
+        var dict = {};
+        query.split(&#x27;&amp;&#x27;).map(function(part) {
+            return part.split(&#x27;=&#x27;).map(decodeURIComponent);
+        }).forEach(function(part) {
+            if (dict[part[0]]) {
+                if (!(Object.prototype.toString.call(dict[part[0]]) == &#x27;[object Array]&#x27;)) {
+                    dict[part[0]] = [dict[part[0]]];
+                }
+
+                dict[part[0]].push(part[1])
+            } else {
+                dict[part[0]] = part[1];
+            }
+        });
+
+        return dict;
+    }
+
+    function doRouting(url, doDefault) {
+        var urlParts = parseUri(url);
+        var handlers = routing.recognize(urlParts.path);
+        var promises = [];
+        if (handlers) {
+            for (var i = 0; i &lt; handlers.length; ++i) {
+                var $context = {
+                    url: urlParts,
+                    params: handlers[i].params,
+                    query: queryToDict(urlParts.query)
+                };
+
+                promises.push(handlers[i].handler($context));
+            }
+        } else if ((doDefault !== false) &amp;&amp; defaultRoute) {
+            promises.push(doDefaultRoute(defaultRoute));
+        }
+
+        return $q.all(promises);
+    }
+
+    function gotoRoute(route) {
+        $window.history.pushState(null,
+            &#x27;&#x27;,
+            route);
+        return doRouting(route);
+    }
+
+    function replaceRoute(route) {
+        $window.history.replaceState(null,
+            &#x27;&#x27;,
+            route);
+
+        return doRouting(route);
+    }
+
+    $window.onpopstate = function() {
+        doRouting($window.location.href);
+    };
+
+    $window.onclick = function(event) {
+        var target = event.target || event.srcElement;
+
+        /*
+         * Related to Safari firing events on text nodes
+         */
+        if (target.nodeType === 3) {
+            target = target.parentNode;
+        }
+
+        if (getAttribute(target, &#x27;data-internal&#x27;) !== null) {
+            preventDefault(event);
+
+            if (getAttribute(target, &#x27;data-no-history&#x27;) !== null) {
+                replaceRoute(getAttribute(target, &#x27;href&#x27;));
+            } else {
+                gotoRoute(getAttribute(target, &#x27;href&#x27;));
+            }
+        }
+    };
+
+    $window.onload = function() {
+        doRouting($window.location.href);
+    };
+
+    return {
+        /**
+         * Set a default route to redirect to when the current route isn&#x27;t
+         * matched to anything
+         *
+         * @method setDefaultRoute
+         * @for $routing
+         * @param {string} newDefaultRoute The default path to route to if the
+         *  current path wasn&#x27;t matched by any defined route
+         */
+        &#x27;setDefaultRoute&#x27;: function(newDefaultRoute) {
+            if (!((typeof newDefaultRoute === &#x27;string&#x27;) || newDefaultRoute instanceof String)) {
+                throw new Error(&#x27;The default route must be given as a string, e.g. &quot;/app&quot;&#x27;);
+            }
+
+            defaultRoute = newDefaultRoute;
+        },
+
+        /**
+         * Set a custom factory for render functions
+         *
+         * Render factories receive the DOM target node for the route and
+         * produce an executable that can be used to render content (that
+         * executable is called &#x60;renderer&#x60;).
+         *
+         * A new renderer is created every time a route is matched by passing
+         * the routes target DOM node to the makeRenderer function.
+         *
+         * Renderer functions are passed to the injectable that is matched with
+         * the route. &#x60;setMakeRenderer&#x60; sets the factory that creates the
+         * render functions.
+         *
+         * The default makeRenderer factory produces renderer functions that
+         * simply set innerHTML on the target DOM node:
+         *
+         *      function(targetAsDOMNode) {
+         *          return function(toRender) {
+         *              targetAsDOMNode.innerHTML = toRender;
+         *          };
+         *      }
+         *
+         * The injectable for any given route can use the render method like
+         * this:
+         *
+         *      mimeo.module(&#x27;example&#x27;, [])
+         *          .component([&#x27;component&#x27;, () =&gt; ($context, $renderer) =&gt; {
+         *              $renderer(&#x27;&lt;h1&gt;Headline content&lt;/h1&gt;&#x27;);
+         *          }]);
+         *
+         * When using a rendering library, it&#x27;s often beneficial to set a
+         * custom
+         * renderer factory to simplify rendering in the component. E.g. with
+         * React, custom components are mounted on DOM nodes via
+         *
+         *      ReactDOM.render(&lt;Component/&gt;, DOMNode);
+         *
+         * A custom &#x60;setMakeRenderer&#x60; for React would create a function that
+         * accepts a React component and mounts it to the routes target DOM
+         * node:
+         *
+         *      $routing.setMakeRenderer(function(targetDOMNode) {
+         *          return function(component) {
+         *              ReactDOM.render(component, targetDOMNode);
+         *          }
+         *      });
+         *
+         * @method setMakeRenderer
+         * @for $routing
+         * @param {Function} newMakeRenderer - Set the renderer factory. Gets
+         * the routes target DOM node passed in
+         */
+        &#x27;setMakeRenderer&#x27;: function(newMakeRenderer) {
+            if (!(newMakeRenderer instanceof Function)) {
+                throw new Error(&#x27;The makeRenderer must be a function&#x27;);
+            }
+
+            makeRenderer = newMakeRenderer;
+        },
+
+        /**
+         * Sets a handler for a route. There can be multiple handlers for any
+         * route.
+         *
+         * The route matching is handled by (the route-recognizer package,
+         * read the docs regarding the route syntax
+         * here)[https://github.com/tildeio/route-recognizer#usage]. You can
+         * capture parts of the url with &#x60;:name&#x60; and &#x60;*name&#x60;:
+         *
+         *      $routing.set(&#x27;/users/:id&#x27;)
+         *      //=&gt; matches /users/1 to { id: 1 }
+         *
+         *      $routing.set(&#x27;/about/*path&#x27;)
+         *      //=&gt; matches /about/location/city to { path: &#x27;location/city&#x27; }
+         *
+         * Captured segments of the url will be available in &#x60;$context.params&#x60;.
+         *
+         * Setting a route matches an injectable with a url:
+         *
+         *      $routing.set(&#x27;/example-url&#x27;, exampleInjectable);
+         *
+         * The injectable that will receive three parameters:
+         *
+         * - $context - information about the current route and access to url
+         * parameters
+         * - $renderer - the renderer $routing is configured to use. Default
+         * just set the html content of the target DOM node
+         * - $target - DOM node that the content should end up in. Useful if
+         * you don&#x27;t want to use $renderer for a specific route
+         *
+         * Set routes in a &#x60;.run()&#x60; block on your root module:
+         *
+         *      mimeo.bootstrap(&#x27;example&#x27;, [])
+         *          .component([&#x27;users&#x27;, () =&gt; ($context, $renderer) =&gt; {
+         *              $renderer(&#x27;&lt;ul&gt;&lt;li&gt;John&lt;/li&gt;&lt;li&gt;Alice&lt;/li&lt;/ul&gt;&#x27;);
+         *          }])
+         *          .component([&#x27;loginForm&#x27;, () =&gt; ($context, $renderer) =&gt; {
+         *              $renderer(&#x27;&lt;form&gt;&lt;/form&gt;&#x27;);
+         *          }])
+         *          .run([
+         *              &#x27;$routing&#x27;,
+         *              &#x27;users&#x27;,
+         *              &#x27;loginForm&#x27;,
+         *              ($routing, users, loginForm) =&gt; {
+         *                  $routing.set(&#x27;/users&#x27;, users);
+         *                  $routing.set(&#x27;/login&#x27;, loginForm);
+         *              }
+         *          ]);
+         *
+         * The &#x60;.run()&#x60; block needs to have all component-injectables you want
+         * to set as route handlers injected. &#x60;.set()&#x60; requires the actual
+         * injectables to be passed in, not the injectables name.
+         *
+         * $context contains information about the current route, it has three
+         * attributes:
+         *
+         * - &#x60;$context.params&#x60; will contain any matched segments from the url.
+         * - &#x60;$context.query&#x60; will contain decoded query parameters as a
+         * key-value hash. Repeating keys will create an array:
+         * &#x60;/example?a=1&amp;b=2&amp;c=3 //=&gt; { a: [1, 2, 3] }&#x60;
+         * - &#x60;$context.url&#x60; represents the parsed url as a key-value store.
+         *
+         * &#x60;$context.url&#x60; example for
+         * &#x60;http://localhost:3000/?example-key=value&#x60;:
+         *
+         *      $context.url = {
+         *          anchor: &#x27;&#x27;,
+         *          authority: &#x27;localhost:3000&#x27;,
+         *          directory: &#x27;/&#x27;,
+         *          file: &#x27;&#x27;,
+         *          host: &#x27;localhost&#x27;,
+         *          password: &#x27;&#x27;,
+         *          path: &#x27;/&#x27;,
+         *          port: &#x27;3000&#x27;,
+         *          protocol: &#x27;http&#x27;,
+         *          query: &#x27;example-key=value&#x27;,
+         *          relative: &#x27;/?example-key=value&#x27;,
+         *          source: &#x27;http://localhost:3000/?example-key=value&#x27;,
+         *          user: &#x27;&#x27;,
+         *          userInfo: &#x27;&#x27;
+         *      }
+         *
+         * @method set
+         * @for $routing
+         * @param {string} route
+         * @param {string} target
+         * @param {Function} injectable
+         * @param {string} [name]
+         */
+        &#x27;set&#x27;: function(route, target, injectable, name) {
+            if (!(injectable instanceof Function)) {
+                var message = &#x27;To set a route, you have to provide an injectable that is executable (i.e. instanceof Function). Route: &#x27; + route + &#x27;, stringified injectable: &quot;&#x27; + String(
+                        injectable + &#x27;&quot;&#x27;);
+                if ((target instanceof Function) &amp;&amp; ((injectable instanceof String) || (typeof injectable === &#x27;string&#x27;))) {
+                    message += &#x27;. Target is a function and injectable is a string. You might have switched the parameters, please double-check that&#x27;;
+                }
+                throw new Error(message);
+            }
+
+            routing.add([
+                {
+                    path: route,
+                    handler: function($context) {
+                        var renderReturn;
+                        var targetAsDOMNode = $window.document.getElementById(
+                            target);
+                        var renderer = makeRenderer(targetAsDOMNode);
+
+                        if (injectable.render) {
+                            renderReturn = injectable.render($context,
+                                renderer,
+                                targetAsDOMNode);
+                        } else {
+                            renderReturn = injectable($context,
+                                renderer,
+                                targetAsDOMNode);
+                        }
+
+                        return $q.when(renderReturn);
+                    }
+                }
+            ], {&#x27;as&#x27;: name});
+        },
+
+        /**
+         * Matches &#x60;route&#x60; and executes all associated injectables
+         *
+         * The return values from the matched injectables are turned into a
+         * promise using {{#crossLink
+         * &quot;$q/when:method&quot;}}$q.when(){{/crossLink}},
+         * and then aggregated with {{#crossLink
+         * &quot;$q/all:method&quot;}}$q.all(){{/crossLink}} and then returned by
+         * &#x60;goto()&#x60;. This allows handling asynchronous requests on the server.
+         *
+         * @example
+         *      mimeo.module(&#x27;example&#x27;, []).
+         *          .component(&#x27;Blog&#x27;, [&#x27;$http&#x27;, ($http) =&gt; () =&gt; {
+         *              return $http.get(&#x27;/example-api/blogs&#x27;)
+         *                  .then((response) =&gt; {
+         *                      return response.data;
+         *                  })
+         *                  .then((blogPosts) =&gt; {
+         *                      return //turn blog posts into html
+         *                  });
+         *          })
+         *          .run([&#x27;$routing&#x27;, &#x27;Blog&#x27;, ($routing, Blog) =&gt; {
+         *              $routing.set(&#x27;/blogs&#x27;, Blog);
+         *          }])
+         *          .run([&#x27;$routing&#x27;, ($routing) =&gt; {
+         *              $routing.goto(&#x27;/blogs&#x27;).then((blogHtml) =&gt; {
+         *                  // save to cdn
+         *              });
+         *          });
+         *
+         * @method goto
+         * @for $routing
+         * @param {string} route Route to go to
+         * @returns {Promise} Promise that is resolved with the return values
+         *  from all matched routes
+         */
+        &#x27;goto&#x27;: function(route) {
+            return gotoRoute(route);
+        }
+    }
+}
+
+module.exports = {
+    &#x27;Routing&#x27;: Routing
+};
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>
