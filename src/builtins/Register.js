@@ -1,3 +1,11 @@
+/**
+ * Mimeo ships with a few built-in injectables, namely {{#crossLink "$q"}}a
+ * promise library called $q{{/crossLink}}, a networking wrapper called $http
+ * and a routing facility called $routing.
+ *
+ * @module Builtins
+ */
+
 var Promise = require('./Promise.js');
 var Routing = require('./Routing.js');
 var Http = require('./Http.js');

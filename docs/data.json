@@ -1,0 +1,1035 @@
+{
+    "project": {
+        "name": "Mimeo Public API Documentation",
+        "description": "Detailed explanation of Mimeos public api",
+        "logo": "mimeo-logo.png",
+        "version": "0.0.1"
+    },
+    "files": {
+        "src/builtins/Http.js": {
+            "name": "src/builtins/Http.js",
+            "modules": {
+                "Builtins": 1
+            },
+            "classes": {
+                "$http": 1
+            },
+            "fors": {
+                "$http": 1
+            },
+            "namespaces": {}
+        },
+        "src/builtins/Promise.js": {
+            "name": "src/builtins/Promise.js",
+            "modules": {},
+            "classes": {
+                "Promise": 1,
+                "Deferred": 1,
+                "$q": 1
+            },
+            "fors": {
+                "Promise": 1,
+                "Deferred": 1,
+                "$q": 1
+            },
+            "namespaces": {}
+        },
+        "src/builtins/Register.js": {
+            "name": "src/builtins/Register.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "src/builtins/Routing.js": {
+            "name": "src/builtins/Routing.js",
+            "modules": {},
+            "classes": {
+                "$routing": 1
+            },
+            "fors": {
+                "$routing": 1
+            },
+            "namespaces": {}
+        },
+        "src/dependencies/DependencyManager.js": {
+            "name": "src/dependencies/DependencyManager.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "src/dependencies/Graph.js": {
+            "name": "src/dependencies/Graph.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "src/Mimeo.js": {
+            "name": "src/Mimeo.js",
+            "modules": {
+                "Mimeo": 1
+            },
+            "classes": {
+                "Mimeo": 1
+            },
+            "fors": {
+                "Mimeo": 1
+            },
+            "namespaces": {}
+        },
+        "src/Module.js": {
+            "name": "src/Module.js",
+            "modules": {},
+            "classes": {
+                "Module": 1
+            },
+            "fors": {
+                "Module": 1
+            },
+            "namespaces": {}
+        }
+    },
+    "modules": {
+        "Builtins": {
+            "name": "Builtins",
+            "submodules": {},
+            "elements": {},
+            "classes": {
+                "$http": 1,
+                "Promise": 1,
+                "Deferred": 1,
+                "$q": 1,
+                "$routing": 1
+            },
+            "fors": {
+                "$http": 1,
+                "Promise": 1,
+                "Deferred": 1,
+                "$q": 1,
+                "$routing": 1
+            },
+            "namespaces": {},
+            "tag": "module",
+            "file": "src/builtins/Routing.js",
+            "line": 8
+        },
+        "Mimeo": {
+            "name": "Mimeo",
+            "submodules": {},
+            "elements": {},
+            "classes": {
+                "Mimeo": 1,
+                "Module": 1
+            },
+            "fors": {
+                "Mimeo": 1,
+                "Module": 1
+            },
+            "namespaces": {},
+            "tag": "module",
+            "file": "src/Module.js",
+            "line": 5,
+            "description": "The mimeo modules describes the use of the mimeo framework."
+        }
+    },
+    "classes": {
+        "$http": {
+            "name": "$http",
+            "shortname": "$http",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Builtins",
+            "namespace": "",
+            "file": "src/builtins/Http.js",
+            "line": 253,
+            "description": "# Send http(s) requests to a server\n\nYou can use $http in two ways, either as a function that accepts a\nconfiguration object, or use shorthand methods for common HTTP methods.\n\nTo use $http as a function, the config object needs to include the url\nand http method:\n\n     $http({\n         url: '/example',\n         method: 'GET'\n     });\n\nFor common http methods there are shorthand functions:\n\n     $http.get('/url');\n     $http.post('/example', { key: 'value' });\n\nBoth variations will return a Promise that resolves with the response\nfrom the server:\n\n     $http.get('/example').then((response) => {\n         console.log(response.data);\n     });\n\nThe response object has the following properties:\n\n     {\n         data: {},\n         //Data is the response body. If response content type is\n         //'application/json' the response body will be JSON decoded and\n         //the decoded object will be accessible in `data`\n         status: 200, // http response code,\n         headers: {\n             'Content-Type': 'application/json'\n         },// response http-headers,\n         config: config, // config object send with request\n         statusText: '200 Success' // http status text\n     }\n\nAll shorthand-methods are documented separately and optionally accept\nthe same config-object `$http` as a function accepts. Should the config\nobject contain different data than the arguments for the shorthand\nmethod, then the arguments to the method take precedent:\n\n     $http.get('/example', {}, { url: '/not-used' });\n     //=> Sends request to '/example'\n\n## Configuration\n\nThe config object can have these keys:\n\n     {\n         method: 'GET',\n         url: '/example',\n         data: {\n             key: 'value'\n         },\n         params: {\n             search: 'a search criteria'\n         },\n         headers: {\n             'Content-Type': 'application/json'\n         }\n     }\n\nDefault settings can be set directly on `$http` and will be used for all\nfuture requests:\n\n     mimeo.module('example', [])\n         .run(['$http', ($http) => {\n             $http.$config.headers['Authorization'] = 'Basic W@3jolb2'\n         });\n\nIf you change values in the headers-object make sure not to override the\nheaders object or if you do, to provide a 'Content-Type' header,\notherwise requests might fail depending on the environment (unspecified\ncontent types should be avoided).\n\nThe `data` field is send as the request body and the `params` key is\nsend as a query string in the url. The `headers` field allows you to set\nhttp headers for only this request, usually used to set a content type.\n\nThe default content type is 'application/json', so by default, `data`\nwill be send as a JSON string to the server. If you want to send a\nbrowser-like form string (content type\n'application/x-www-form-urlencoded') you have to set the content type\nin the `headers` field and `data` must be a string. It's up to you to\nbuild the form-urlencoded string.\n\n## Defaults\n\nThe default values `$http` uses can be changed and will be applied to\nevery request. There are three configurable properties:\n\n- `$http.$host`\n- `$http.$protocol`\n- `$http.$config`\n\n`$http.$host` is the host that will be used for every request. By\ndefault, no host is used. For use in the browser this is fine, as the\nbrowser simply uses the current host. For use with NodeJS `$http.$host`\nhas to be set as there is not default host. Setting the host for the\nbrowser will send all requests to the specified host, and not the\ncurrent host. In that case the host has to support\n[cross-origin HTTP\nrequests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS).\n\n`$http.$protocol` should be one of 'http' or 'https', depending on what\nyour app uses.\n\n`$http.$config` is merged into the config object passed to `$http` or\none\nof the shorthand methods. The settings in the config object passed to\n`$http` or the shorthand method takes precedent:\n\n     $http.$config.headers['Authorization'] = 'Basic F@L#B';\n     $http.post('/example', { key: 'value' }, {\n         headers: {\n             'Authorization': 'None'\n         }\n     );\n     //=> Will send 'None' as the 'Authorization' header.\n\nAn example changing all the available properties:\n\n     mimeo.module('example', [])\n         .run(['$http', ($http) => {\n             $http.$host = 'http://www.example.com';\n             $http.$protocol = 'https';\n             $http.$config.headers['Authorization'] = 'Basic F@L#B'\n         });",
+            "params": [
+                {
+                    "name": "config",
+                    "description": ""
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "is_constructor": 1
+        },
+        "Promise": {
+            "name": "Promise",
+            "shortname": "Promise",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Builtins",
+            "namespace": "",
+            "file": "src/builtins/Promise.js",
+            "line": 5,
+            "description": "An instance of a promise. Created and accessed through $q.",
+            "access": "private",
+            "tagname": "",
+            "is_constructor": 1
+        },
+        "Deferred": {
+            "name": "Deferred",
+            "shortname": "Deferred",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Builtins",
+            "namespace": "",
+            "file": "src/builtins/Promise.js",
+            "line": 153,
+            "description": "The deferred object that's wrapped by $q",
+            "params": [
+                {
+                    "name": "init",
+                    "description": "This callback is passed three arguments, `resolve`,\n `reject` and `notify` that respectively resolve, reject or notify the\n deferreds promise.",
+                    "type": "Function"
+                }
+            ],
+            "is_constructor": 1
+        },
+        "$q": {
+            "name": "$q",
+            "shortname": "$q",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Builtins",
+            "namespace": "",
+            "file": "src/builtins/Promise.js",
+            "line": 205,
+            "description": "Creates and manages promises. Used by $http and $routing.\n\n$q is used to create a deferred object, which contains a promise. The\ndeferred is used to create and manage promises.\n\nA promise accepts resolution, rejection and notification handlers that are\nexecuted when the promise itself is resolved, rejected or notified. The\nhandlers are attached to the promise via the {{#crossLink \"Promise/then:method\"}}\n.then(){{/crossLink}} method.\n\nYou can attach multiple handlers by calling .then() multiple times with\ndifferent handlers. In addition, you can chain .then() calls. In this case,\nthe return value from .then() is a new promise that's attached to the resolve\nhandler passed to .then(). This way you can return promises from your resolve\nhandler and the next .then() will wait until that promise is resolved to\ncontinue. Usually used to do multiple asyncronous calls in sequence.",
+            "params": [
+                {
+                    "name": "callback",
+                    "description": "The callback to initialized the deferred object\nwith",
+                    "type": "Function"
+                }
+            ],
+            "is_constructor": 1,
+            "return": {
+                "description": "",
+                "type": "Promise"
+            }
+        },
+        "$routing": {
+            "name": "$routing",
+            "shortname": "$routing",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Builtins",
+            "namespace": "",
+            "file": "src/builtins/Routing.js",
+            "line": 8,
+            "description": "# Routing for Mimeo\n\nThis builtin handles routing by managing the browsers history and matching\nroutes with injectables (usually components.)\n\nThe general workflow would be to inject `$routing` into a\n{{#crossLink \"Module/run:method\"}}`.run()`{{/crossLink}} injectable on your\nroot module along with the injectables you want to match to the routes, and\n{{#crossLink \"$routing/set:method\"}}define routes there{{/crossLink}}:\n\n     mimeo.module('example', [])\n         .run([\n             '$routing',\n             'usersComponent',\n             'loginComponent',\n             ($routing) => {\n                 $routing.set('/users', usersComponent);\n                 $routing.set('/login', loginComponent);\n             }\n         );\n\n## Generating output\n\nHow output is generated is up to the matched injectable. Once an injectable\nis matched to a route, it is invoked with three parameters:\n\n- context\n- renderer\n- targetDOMNode\n\nContext is an object that contains information about the matched route. See\n{{#crossLink \"$routing/set:method\"}}the `set` method for more details\n{{/crossLink}}. Renderer is a helper to produce output and can be\nconfigured.\ntargetDOMNode is the DOM node that was associated with the route.\n\nSince the injectable has access to the DOM node, it can simply update the\nnodes content to produce output. The `renderer` is not strictly necessary.\nHowever, when using a rendering library like React, manually calling\nReactDOM.render(exampleComponent, targetDOMNode) is annoying and also makes\nit impossible to switch to e.g.\nReactDOMServer.renderToStaticMarkup(exampleComponent) to produce output\nin NodeJS.\n\nUsing a renderer has the advantage of being able to change the rendering\nmethod depending on the environment the app is in. Using\n{{#crossLink\n\"$routing/setMakeRenderer:method\"}}`setMakeRenderer`{{/crossLink}}\nto define a default renderer allows the matched injectable to simply call\n`renderer(exampleComponent)` and not deal with the specifics of generating\noutput. An example for React:\n\n     mimeo.module('example', [])\n         // target is not used since the custom renderer will take care of\n         // mounting the react node\n         .component(['usersComponent', () => ($context, $render) => {\n             let Users = React.createClass({}); // example component\n\n             return $render(<Users />);\n         })\n         .run(['$routing', 'usersComponent', ($routing, usersComponent) => {\n             $routing.setMakeRenderer(function(targetDOMNode) {\n                 return function(reactNode) {\n                     return ReactDOM.render(reactNode, targetDOMNode);\n                 };\n             });\n\n             $routing.set('/users', usersComponent);\n         });\n\n## Initiate routing\n\nThere are three ways to change the current route:\n\n- {{#crossLink \"$routing/goto:method\"}}goto{{/crossLink}}\n- a-tag with a href and a 'data-internal' attribute\n- a-tag with a href, a 'data-internal' and 'data-no-history' attribute\n\n`.goto()` is mainly used for server-side rendering. If you set a\n{{#crossLink \"$routing/setMakeRenderer:method\"}}a renderer{{/crossLink}} that\nsupports server-side output, you won't have to change your components to\ngenerate the output. `.goto()` will return a promise that is full-filled\nwith the return value from the component. You can have your server-side\nentry-point attach to that promise and then do with the output what you\nneed (e.g. send an email, save to a static .html file, etc.)\n\nThe other two are simply a-tags in your html. `$routing` attaches an event\nhandler to the document that listens to clicks on a-tags with a\n'data-internal' attribute. The value from the 'href' attribute is used as the\nroute to handle. The 'data-no-history' attribute controls whether a new\nbrowser-history entry is created. If the attribute is present, no history\nis created.",
+            "static": 1
+        },
+        "Mimeo": {
+            "name": "Mimeo",
+            "shortname": "Mimeo",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Mimeo",
+            "namespace": "",
+            "file": "src/Mimeo.js",
+            "line": 12,
+            "description": "This is the entry point for the Mimeo framework. Create modules or bootstrap\nan injectable.",
+            "static": 1
+        },
+        "Module": {
+            "name": "Module",
+            "shortname": "Module",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "module": "Mimeo",
+            "namespace": "",
+            "file": "src/Module.js",
+            "line": 5,
+            "description": "Modules are the primary interface to mimeo. On a module, you can define\ninjectables. Each injectable definition will return the current module,\nallowing you to chain injectable definitions.\n\nInjectables consist of three parts: A name, a list of dependencies and an\nexecutable. The dependencies are names of other injectables that will be\npassed to the executable.\n\nThere are two ways of defining an injectable. The first is an array notation\nwhere the last entry in the array is the executable. The other is an\nexecutable that has the special properties $name and $inject.\n\nHere is an example of the array-style. Two factories A and B are defined,\nwith B having a dependency on A:\n\n     mimeo.module('example', [])\n         .factory('A', [() => {}])\n         .factory('B', ['B', (b) => {}])\n\nAnd here's how the same example would look like with the executable style:\n\n     function A() {}\n     A.$name = 'A';\n     A.$inject = [];\n\n     function B() {}\n     B.$name = 'B';\n     B.$inject = ['A'];\n\n     mimeo.module('example', [])\n         .factory(A)\n         .factory(B);\n\nThe executable-style makes it very easy to separate out your code from the\nmimeo bindings. In the example, function A and B can be used independent of\nmimeo. This is great of unit-testing your code, as you can import the\nexecutables into your test suite without having to worry about mimeo.",
+            "is_constructor": 1
+        }
+    },
+    "elements": {},
+    "classitems": [
+        {
+            "file": "src/builtins/Http.js",
+            "line": 400,
+            "description": "When using Mimeo on NodeJS, setting $host to the host you want to send\nrequests to is a requirement.",
+            "itemtype": "property",
+            "name": "$host",
+            "type": "{string}",
+            "class": "$http",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Http.js",
+            "line": 417,
+            "description": "Send a GET request",
+            "itemtype": "method",
+            "name": "get",
+            "static": 1,
+            "params": [
+                {
+                    "name": "url",
+                    "description": "Url you want to send request to",
+                    "type": "String"
+                },
+                {
+                    "name": "params",
+                    "description": "Query parameters as a hash",
+                    "type": "Object",
+                    "optional": true
+                },
+                {
+                    "name": "config",
+                    "description": "Config for this request",
+                    "type": "Object",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "class": "$http",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Http.js",
+            "line": 439,
+            "description": "Send a HEAD request. The server response will not include a body",
+            "itemtype": "method",
+            "name": "head",
+            "static": 1,
+            "params": [
+                {
+                    "name": "url",
+                    "description": "Url you want to send request to",
+                    "type": "String"
+                },
+                {
+                    "name": "params",
+                    "description": "Query parameters as a hash",
+                    "type": "Object",
+                    "optional": true
+                },
+                {
+                    "name": "config",
+                    "description": "Config for this request",
+                    "type": "Object",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "class": "$http",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Http.js",
+            "line": 461,
+            "description": "Send a POST request. By default, `data` will be JSON encoded and send as\nthe request body.",
+            "itemtype": "method",
+            "name": "post",
+            "static": 1,
+            "params": [
+                {
+                    "name": "url",
+                    "description": "Url you want to send request to",
+                    "type": "String"
+                },
+                {
+                    "name": "data",
+                    "description": "Object to send as request body. If content-type\nis set to 'application/json' (which is the default), `data` will be\nJSON-encoded before sending",
+                    "type": "Object",
+                    "optional": true
+                },
+                {
+                    "name": "config",
+                    "description": "Config for this request",
+                    "type": "Object",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "class": "$http",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Http.js",
+            "line": 486,
+            "description": "Send a PUT request. By default, `data` will be JSON encoded and send as\nthe request body.",
+            "itemtype": "method",
+            "name": "put",
+            "static": 1,
+            "params": [
+                {
+                    "name": "url",
+                    "description": "Url you want to send request to",
+                    "type": "String"
+                },
+                {
+                    "name": "data",
+                    "description": "Object to send as request body. If content-type\nis set to 'application/json' (which is the default), `data` will be\nJSON-encoded before sending",
+                    "type": "Object",
+                    "optional": true
+                },
+                {
+                    "name": "config",
+                    "description": "Config for this request",
+                    "type": "Object",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "class": "$http",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Http.js",
+            "line": 511,
+            "description": "Send a PATCH request. By default, `data` will be JSON encoded and send as\nthe request body.",
+            "itemtype": "method",
+            "name": "patch",
+            "static": 1,
+            "params": [
+                {
+                    "name": "url",
+                    "description": "Url you want to send request to",
+                    "type": "String"
+                },
+                {
+                    "name": "data",
+                    "description": "Object to send as request body. If content-type\nis set to 'application/json' (which is the default), `data` will be\nJSON-encoded before sending",
+                    "type": "Object",
+                    "optional": true
+                },
+                {
+                    "name": "config",
+                    "description": "Config for this request",
+                    "type": "Object",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "class": "$http",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Http.js",
+            "line": 534,
+            "description": "Send a DELETE request. Does not accept any parameters or data to send\nwith the request, as the URL should identify the entity to delete",
+            "itemtype": "method",
+            "name": "delete",
+            "static": 1,
+            "params": [
+                {
+                    "name": "url",
+                    "description": "Url you want to send request to",
+                    "type": "String"
+                },
+                {
+                    "name": "config",
+                    "description": "Config for this request",
+                    "type": "Object",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "class": "$http",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 21,
+            "description": "Attach resolution, rejection and notification handlers to the promise.",
+            "itemtype": "method",
+            "name": "then",
+            "chainable": 1,
+            "params": [
+                {
+                    "name": "onResolve",
+                    "description": "Executed when the promise is resolved.\n If another promise is returned, the next promise in the chain is\n attached to the returned promise. If a value is returned, the next\n promise in the chain is resolved with the returned value immediately.",
+                    "type": "Function"
+                },
+                {
+                    "name": "onReject",
+                    "description": "Executed when the promise is rejected",
+                    "type": "Function"
+                },
+                {
+                    "name": "onNotify",
+                    "description": "Executed when the promise notified",
+                    "type": "Function"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "class": "Promise",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 88,
+            "description": "Registers a rejection handler. Shorthand for `.then(_, onReject)`.",
+            "itemtype": "method",
+            "name": "catch",
+            "chainable": 1,
+            "params": [
+                {
+                    "name": "onReject",
+                    "description": "Executed when\n the promise is rejected. Receives the rejection reason as argument."
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "class": "Promise",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 102,
+            "description": "Send a notification to the promise.",
+            "itemtype": "method",
+            "name": "notify",
+            "params": [
+                {
+                    "name": "notifyWith",
+                    "description": "Notification value",
+                    "type": "*"
+                }
+            ],
+            "class": "Promise",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 115,
+            "description": "Rejects the promise.",
+            "itemtype": "method",
+            "name": "reject",
+            "params": [
+                {
+                    "name": "rejectWith",
+                    "description": "Rejection reason. Will be passed on to the\n rejection handlers",
+                    "type": "*"
+                }
+            ],
+            "class": "Promise",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 132,
+            "description": "Resolves the promise.",
+            "itemtype": "method",
+            "name": "resolve",
+            "params": [
+                {
+                    "name": "resolveWith",
+                    "description": "This value is passed on to the resolution\n handlers attached to the promise.",
+                    "type": "*"
+                }
+            ],
+            "class": "Promise",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 170,
+            "description": "See {{#crossLink \"Promise/resolve:method\"}}the underlying\npromises resolve{{/crossLink}} documentation.",
+            "itemtype": "method",
+            "name": "resolve",
+            "class": "Deferred",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 179,
+            "description": "See {{#crossLink \"Promise/reject:method\"}}the underlying\npromises reject{{/crossLink}} documentation.",
+            "itemtype": "method",
+            "name": "reject",
+            "class": "Deferred",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 188,
+            "description": "See {{#crossLink \"Promise/notify:method\"}}the underlying\npromises notify{{/crossLink}} documentation.",
+            "itemtype": "method",
+            "name": "notify",
+            "class": "Deferred",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 197,
+            "itemtype": "property",
+            "name": "promise",
+            "type": "Promise",
+            "class": "Deferred",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 233,
+            "description": "Create a new defer. This method requires no arguments, the returned defer has\nthe methods required to resolve/reject/notify the promise.",
+            "example": [
+                "\n     let defer = $q.defer();\n     defer.promise.then((name) => console.log('Hi ' + name));\n     defer.resolve('John');\n     //=> \"Hi John\""
+            ],
+            "itemtype": "method",
+            "name": "defer",
+            "return": {
+                "description": "",
+                "type": "Deferred"
+            },
+            "class": "$q",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 250,
+            "description": "Creates a new promise and resolves it with `value`. If `value` is a promise,\nthe returned promise is attached to `value`. If onResolve, onReject or\nonNotify are given, they are attached to the new promise.",
+            "itemtype": "method",
+            "name": "when",
+            "example": [
+                "\n     $q.when('John').then((name) => console.log('Hi ' + name));\n     //=> \"Hi John\""
+            ],
+            "params": [
+                {
+                    "name": "value",
+                    "description": "Value that the returned promise is resolve with. If\n value is a promise, the returned promise is attached to value.",
+                    "type": "*|Promise"
+                },
+                {
+                    "name": "onResolve",
+                    "description": "Resolve handler",
+                    "type": "Function",
+                    "optional": true
+                },
+                {
+                    "name": "onReject",
+                    "description": "Rejection handler",
+                    "type": "Function",
+                    "optional": true
+                },
+                {
+                    "name": "onNotify",
+                    "description": "Notification handler",
+                    "type": "Function",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "class": "$q",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 287,
+            "description": "Alias for {{#crossLink \"$q/when:method\"}}$q.when{{/crossLink}}",
+            "itemtype": "method",
+            "name": "resolve",
+            "class": "$q",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Promise.js",
+            "line": 294,
+            "description": "Takes an array of promises (called inner promises) and creates a new promise\n(called outer promise) that resolves when all the inner promises resolve.\nIf any of the inner promises are rejected, the outer promise is\nimmediately rejected as well and any other inner promises left over are\ndiscarded.\n\nE.g. if you have three inner promises, A, B, and C, then the outer promise O\nis resolved once all three A, B and C are resolved.\n\nIf A is resolved, and B is rejected, and C is pending, then O will be\nrejected regardless of C's outcome.",
+            "itemtype": "method",
+            "name": "all",
+            "example": [
+                "\n     let greeting = $q.defer();\n     let name = $q.defer();\n\n     $q.all([greeting.promise, name.promise])\n         .then((greeting, name) => console.log(greeting + ' ' + name));\n\n     greeting.resolve('Welcome');\n     name.resolve('John')\n     //=> \"Welcome John\""
+            ],
+            "params": [
+                {
+                    "name": "promises",
+                    "description": "Array of promises",
+                    "type": "Array"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Promise"
+            },
+            "class": "$q",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Routing.js",
+            "line": 234,
+            "description": "Set a default route to redirect to when the current route isn't\nmatched to anything",
+            "itemtype": "method",
+            "name": "setDefaultRoute",
+            "params": [
+                {
+                    "name": "newDefaultRoute",
+                    "description": "The default path to route to if the\n current path wasn't matched by any defined route",
+                    "type": "String"
+                }
+            ],
+            "class": "$routing",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Routing.js",
+            "line": 251,
+            "description": "Set a custom factory for render functions\n\nRender factories receive the DOM target node for the route and\nproduce an executable that can be used to render content (that\nexecutable is called `renderer`).\n\nA new renderer is created every time a route is matched by passing\nthe routes target DOM node to the makeRenderer function.\n\nRenderer functions are passed to the injectable that is matched with\nthe route. `setMakeRenderer` sets the factory that creates the\nrender functions.\n\nThe default makeRenderer factory produces renderer functions that\nsimply set innerHTML on the target DOM node:\n\n     function(targetAsDOMNode) {\n         return function(toRender) {\n             targetAsDOMNode.innerHTML = toRender;\n         };\n     }\n\nThe injectable for any given route can use the render method like\nthis:\n\n     mimeo.module('example', [])\n         .component(['component', () => ($context, $renderer) => {\n             $renderer('<h1>Headline content</h1>');\n         }]);\n\nWhen using a rendering library, it's often beneficial to set a\ncustom\nrenderer factory to simplify rendering in the component. E.g. with\nReact, custom components are mounted on DOM nodes via\n\n     ReactDOM.render(<Component/>, DOMNode);\n\nA custom `setMakeRenderer` for React would create a function that\naccepts a React component and mounts it to the routes target DOM\nnode:\n\n     $routing.setMakeRenderer(function(targetDOMNode) {\n         return function(component) {\n             ReactDOM.render(component, targetDOMNode);\n         }\n     });",
+            "itemtype": "method",
+            "name": "setMakeRenderer",
+            "params": [
+                {
+                    "name": "newMakeRenderer",
+                    "description": "- Set the renderer factory. Gets\nthe routes target DOM node passed in",
+                    "type": "Function"
+                }
+            ],
+            "class": "$routing",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Routing.js",
+            "line": 312,
+            "description": "Sets a handler for a route. There can be multiple handlers for any\nroute.\n\nThe route matching is handled by (the route-recognizer package,\nread the docs regarding the route syntax\nhere)[https://github.com/tildeio/route-recognizer#usage]. You can\ncapture parts of the url with `:name` and `*name`:\n\n     $routing.set('/users/:id')\n     //=> matches /users/1 to { id: 1 }\n\n     $routing.set('/about/*path')\n     //=> matches /about/location/city to { path: 'location/city' }\n\nCaptured segments of the url will be available in `$context.params`.\n\nSetting a route matches an injectable with a url:\n\n     $routing.set('/example-url', exampleInjectable);\n\nThe injectable that will receive three parameters:\n\n- $context - information about the current route and access to url\nparameters\n- $renderer - the renderer $routing is configured to use. Default\njust set the html content of the target DOM node\n- $target - DOM node that the content should end up in. Useful if\nyou don't want to use $renderer for a specific route\n\nSet routes in a `.run()` block on your root module:\n\n     mimeo.bootstrap('example', [])\n         .component(['users', () => ($context, $renderer) => {\n             $renderer('<ul><li>John</li><li>Alice</li</ul>');\n         }])\n         .component(['loginForm', () => ($context, $renderer) => {\n             $renderer('<form></form>');\n         }])\n         .run([\n             '$routing',\n             'users',\n             'loginForm',\n             ($routing, users, loginForm) => {\n                 $routing.set('/users', users);\n                 $routing.set('/login', loginForm);\n             }\n         ]);\n\nThe `.run()` block needs to have all component-injectables you want\nto set as route handlers injected. `.set()` requires the actual\ninjectables to be passed in, not the injectables name.\n\n$context contains information about the current route, it has three\nattributes:\n\n- `$context.params` will contain any matched segments from the url.\n- `$context.query` will contain decoded query parameters as a\nkey-value hash. Repeating keys will create an array:\n`/example?a=1&b=2&c=3 //=> { a: [1, 2, 3] }`\n- `$context.url` represents the parsed url as a key-value store.\n\n`$context.url` example for\n`http://localhost:3000/?example-key=value`:\n\n     $context.url = {\n         anchor: '',\n         authority: 'localhost:3000',\n         directory: '/',\n         file: '',\n         host: 'localhost',\n         password: '',\n         path: '/',\n         port: '3000',\n         protocol: 'http',\n         query: 'example-key=value',\n         relative: '/?example-key=value',\n         source: 'http://localhost:3000/?example-key=value',\n         user: '',\n         userInfo: ''\n     }",
+            "itemtype": "method",
+            "name": "set",
+            "params": [
+                {
+                    "name": "route",
+                    "description": "",
+                    "type": "String"
+                },
+                {
+                    "name": "target",
+                    "description": "",
+                    "type": "String"
+                },
+                {
+                    "name": "injectable",
+                    "description": "",
+                    "type": "Function"
+                },
+                {
+                    "name": "name",
+                    "description": "",
+                    "type": "String",
+                    "optional": true
+                }
+            ],
+            "class": "$routing",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Routing.js",
+            "line": 436,
+            "description": "Matches `route` and executes all associated injectables\n\nThe return values from the matched injectables are turned into a\npromise using {{#crossLink\n\"$q/when:method\"}}$q.when(){{/crossLink}},\nand then aggregated with {{#crossLink\n\"$q/all:method\"}}$q.all(){{/crossLink}} and then returned by\n`goto()`. This allows handling asynchronous requests on the server.",
+            "example": [
+                "\n     mimeo.module('example', []).\n         .component('Blog', ['$http', ($http) => () => {\n             return $http.get('/example-api/blogs')\n                 .then((response) => {\n                     return response.data;\n                 })\n                 .then((blogPosts) => {\n                     return //turn blog posts into html\n                 });\n         })\n         .run(['$routing', 'Blog', ($routing, Blog) => {\n             $routing.set('/blogs', Blog);\n         }])\n         .run(['$routing', ($routing) => {\n             $routing.goto('/blogs').then((blogHtml) => {\n                 // save to cdn\n             });\n         });"
+            ],
+            "itemtype": "method",
+            "name": "goto",
+            "params": [
+                {
+                    "name": "route",
+                    "description": "Route to go to",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "Promise that is resolved with the return values\n from all matched routes",
+                "type": "Promise"
+            },
+            "class": "$routing",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/dependencies/DependencyManager.js",
+            "line": 4,
+            "params": [
+                {
+                    "name": "name",
+                    "description": ""
+                }
+            ],
+            "return": {
+                "description": "}",
+                "type": "$name: string, register: register, hasAllDependencies:!~YUIDOC_LINE~!     hasAllDependencies, instantiate: instantiate, getInstance: getInstance"
+            },
+            "is_constructor": 1,
+            "class": "Mimeo",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/dependencies/DependencyManager.js",
+            "line": 116,
+            "params": [
+                {
+                    "name": "name",
+                    "description": ""
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "DependencyManager"
+            },
+            "class": "Mimeo",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/dependencies/Graph.js",
+            "line": 25,
+            "description": "Directed graph to order nodes by dependencies. Only handles values whose\n.toString() function returns unique values. Favors pre-computed lookup\ntables over lookups at sort time. Most machines have lots of ram and\nespecially on mobile the CPU is more restricted. Using more ram and less\nCPU cycles is preferable in those conditions, although it should hardly\nmatter since most dependency graphs (which this implementation is focused\non) shouldn't exceed a few hundred nodes.",
+            "return": {
+                "description": "}",
+                "type": "Add: Function, addEdge: Function, hasNodeValue: Function,!~YUIDOC_LINE~!    getNodesTopological: Function"
+            },
+            "is_constructor": 1,
+            "class": "Mimeo",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/Mimeo.js",
+            "line": 56,
+            "description": "In Mimeo, modules are top-level constructs that own and manage\ninjectables. Modules can depend on other module and will be instantiated\nin dependency-order.",
+            "itemtype": "method",
+            "name": "module",
+            "example": [
+                "\n     mimeo.module('example', [])\n         .component('greeting', () => (name) => console.log('Hi, ' + name);"
+            ],
+            "params": [
+                {
+                    "name": "name",
+                    "description": "Name of the module",
+                    "type": "String"
+                },
+                {
+                    "name": "dependencies",
+                    "description": "Array of module names that this\n module depends on",
+                    "type": "Array",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Module"
+            },
+            "class": "Mimeo",
+            "module": "Mimeo"
+        },
+        {
+            "file": "src/Mimeo.js",
+            "line": 79,
+            "itemtype": "method",
+            "name": "bootstrap",
+            "example": [
+                "\n     mimeo.module('example', [])\n         .component('greeting', () => (name) => console.log('Hi, ' + name);\n     mimeo.bootstrap('greeting', 'John')\n     //=> \"Hi, John\""
+            ],
+            "params": [
+                {
+                    "name": "injectableName",
+                    "description": "",
+                    "type": "String"
+                },
+                {
+                    "name": "parameters",
+                    "description": "Passed through to injectable",
+                    "type": "Object",
+                    "optional": true,
+                    "multiple": true
+                }
+            ],
+            "class": "Mimeo",
+            "module": "Mimeo"
+        },
+        {
+            "file": "src/Module.js",
+            "line": 114,
+            "description": "Defines an injectable that will be run after modules are instantiated.",
+            "itemtype": "method",
+            "name": "run",
+            "chainable": 1,
+            "params": [
+                {
+                    "name": "Injectable",
+                    "description": "definition",
+                    "type": "Array|Function"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Module"
+            },
+            "class": "Module",
+            "module": "Mimeo"
+        },
+        {
+            "file": "src/Module.js",
+            "line": 148,
+            "description": "Use factories for anything that doesn't create output",
+            "itemtype": "method",
+            "name": "factory",
+            "chainable": 1,
+            "params": [
+                {
+                    "name": "Injectable",
+                    "description": "definition",
+                    "type": "Array|Function"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Module"
+            },
+            "class": "Module",
+            "module": "Mimeo"
+        },
+        {
+            "file": "src/Module.js",
+            "line": 159,
+            "description": "Components are meant to produce some output, regardless of what rendering\ntechnique you use",
+            "itemtype": "method",
+            "name": "component",
+            "chainable": 1,
+            "params": [
+                {
+                    "name": "Injectable",
+                    "description": "definition",
+                    "type": "Array|Function"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Module"
+            },
+            "class": "Module",
+            "module": "Mimeo"
+        },
+        {
+            "file": "src/Module.js",
+            "line": 171,
+            "description": "Values are different from factories and components in that there's no\nexecutable. It's just a name and a value.",
+            "example": [
+                "\n     mimeo.module('example', [])\n         .value('name', 'value')"
+            ],
+            "itemtype": "method",
+            "name": "value",
+            "chainable": 1,
+            "params": [
+                {
+                    "name": "name",
+                    "description": "Name of value",
+                    "type": "String"
+                },
+                {
+                    "name": "value",
+                    "description": "Value you want available for injection",
+                    "type": "*"
+                }
+            ],
+            "return": {
+                "description": "",
+                "type": "Module"
+            },
+            "class": "Module",
+            "module": "Mimeo"
+        }
+    ],
+    "warnings": [
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " src/builtins/Http.js:417"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " src/builtins/Http.js:439"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " src/builtins/Http.js:461"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " src/builtins/Http.js:486"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " src/builtins/Http.js:511"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " src/builtins/Http.js:534"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " src/builtins/Routing.js:436"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " src/dependencies/DependencyManager.js:4"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " src/dependencies/DependencyManager.js:116"
+        },
+        {
+            "message": "replacing incorrect tag: returns with return",
+            "line": " src/dependencies/Graph.js:25"
+        },
+        {
+            "message": "Missing item type",
+            "line": " src/dependencies/DependencyManager.js:4"
+        },
+        {
+            "message": "Missing item type",
+            "line": " src/dependencies/DependencyManager.js:116"
+        },
+        {
+            "message": "Missing item type\nDirected graph to order nodes by dependencies. Only handles values whose\n.toString() function returns unique values. Favors pre-computed lookup\ntables over lookups at sort time. Most machines have lots of ram and\nespecially on mobile the CPU is more restricted. Using more ram and less\nCPU cycles is preferable in those conditions, although it should hardly\nmatter since most dependency graphs (which this implementation is focused\non) shouldn't exceed a few hundred nodes.",
+            "line": " src/dependencies/Graph.js:25"
+        }
+    ]
+}

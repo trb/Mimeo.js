@@ -1,0 +1,10 @@
+{
+  "name": "Mimeo Public API Documentation",
+  "description": "Detailed explanation of Mimeos public api",
+  "logo": "mimeo-logo.png",
+  "options": {
+    "outdir": "docs",
+    "paths": "src",
+    "tabtospace": 4
+  }
+}

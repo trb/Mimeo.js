@@ -31,7 +31,8 @@
     "watchify": "3.7.0",
     "chai": "3.3.0",
     "istanbul": "0.3.22",
-    "mocha": "2.3.3"
+    "mocha": "2.3.3",
+    "yuidocjs": "0.10.1"
   },
   "license": "GPLv2"
 }

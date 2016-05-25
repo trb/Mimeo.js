@@ -1,10 +1,21 @@
+/**
+ * The mimeo modules describes the use of the mimeo framework.
+ *
+ * @module Mimeo
+ */
 var Module = require('./Module.js');
 
 var Modules = require('./dependencies/Modules.js');
 var Injectables = require('./dependencies/Injectables.js');
 
 var registerBuiltIns = require('./builtins/Register.js');
-
+/**
+ * This is the entry point for the Mimeo framework. Create modules or bootstrap
+ * an injectable.
+ *
+ * @class Mimeo
+ * @static
+ */
 var Mimeo = function() {
     var modules = Modules();
     var injectables = Injectables();
@@ -42,6 +53,21 @@ var Mimeo = function() {
     }
 
     return {
+        /**
+         * In Mimeo, modules are top-level constructs that own and manage
+         * injectables. Modules can depend on other module and will be instantiated
+         * in dependency-order.
+         *
+         * @method module
+         * @for Mimeo
+         * @example
+         *      mimeo.module('example', [])
+         *          .component('greeting', () => (name) => console.log('Hi, ' + name);
+         * @param {string} name Name of the module
+         * @param {Array} [dependencies] Array of module names that this
+         *  module depends on
+         * @return {Module}
+         */
         module: function(name, dependencies) {
             if (dependencies) {
                 return modules.add(new Module(injectables, name, dependencies));
@@ -49,6 +75,18 @@ var Mimeo = function() {
 
             return modules.get(name);
         },
+
+        /**
+         * @method bootstrap
+         * @for Mimeo
+         * @example
+         *      mimeo.module('example', [])
+         *          .component('greeting', () => (name) => console.log('Hi, ' + name);
+         *      mimeo.bootstrap('greeting', 'John')
+         *      //=> "Hi, John"
+         * @param {string} injectableName
+         * @param {object} [...parameters] Passed through to injectable
+         */
         bootstrap: bootstrap
     }
 };

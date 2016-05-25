@@ -1,1 +1,0 @@
-mimeo = require('./src/Mimeo.js');

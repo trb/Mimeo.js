@@ -1,3 +1,49 @@
+/**
+ * @module Mimeo
+ */
+
+/**
+ * Modules are the primary interface to mimeo. On a module, you can define
+ * injectables. Each injectable definition will return the current module,
+ * allowing you to chain injectable definitions.
+ *
+ * Injectables consist of three parts: A name, a list of dependencies and an
+ * executable. The dependencies are names of other injectables that will be
+ * passed to the executable.
+ *
+ * There are two ways of defining an injectable. The first is an array notation
+ * where the last entry in the array is the executable. The other is an
+ * executable that has the special properties $name and $inject.
+ *
+ * Here is an example of the array-style. Two factories A and B are defined,
+ * with B having a dependency on A:
+ *
+ *      mimeo.module('example', [])
+ *          .factory('A', [() => {}])
+ *          .factory('B', ['B', (b) => {}])
+ *
+ * And here's how the same example would look like with the executable style:
+ *
+ *      function A() {}
+ *      A.$name = 'A';
+ *      A.$inject = [];
+ *
+ *      function B() {}
+ *      B.$name = 'B';
+ *      B.$inject = ['A'];
+ *
+ *      mimeo.module('example', [])
+ *          .factory(A)
+ *          .factory(B);
+ *
+ * The executable-style makes it very easy to separate out your code from the
+ * mimeo bindings. In the example, function A and B can be used independent of
+ * mimeo. This is great of unit-testing your code, as you can import the
+ * executables into your test suite without having to worry about mimeo.
+ *
+ * @class Module
+ * @constructor
+ */
 function Module(injectables, name, dependencies) {
     var module = this;
 
@@ -65,6 +111,15 @@ function Module(injectables, name, dependencies) {
      * would be wasted. Hence the "hack" here with an auto-generated name and
      * a wrapper that executes the run-function with pass-through arguments.
      */
+    /**
+     * Defines an injectable that will be run after modules are instantiated.
+     *
+     * @method run
+     * @for Module
+     * @chainable
+     * @param {Array|Function} Injectable definition
+     * @return {Module}
+     */
     this.run = function(parameters) {
         var name = module.$name + '-run.' + toRun.length;
         toRun.push(name);
@@ -90,8 +145,44 @@ function Module(injectables, name, dependencies) {
         return addInjectable(name, provider);
     };
 
+    /**
+     * Use factories for anything that doesn't create output
+     *
+     * @method factory
+     * @for Module
+     * @chainable
+     * @param {Array|Function} Injectable definition
+     * @return {Module}
+     */
     this.factory = addInjectable;
+
+    /**
+     * Components are meant to produce some output, regardless of what rendering
+     * technique you use
+     *
+     * @method component
+     * @for Module
+     * @chainable
+     * @param {Array|Function} Injectable definition
+     * @return {Module}
+     */
     this.component = addInjectable;
+
+    /**
+     * Values are different from factories and components in that there's no
+     * executable. It's just a name and a value.
+     *
+     * @example
+     *      mimeo.module('example', [])
+     *          .value('name', 'value')
+     *
+     * @method value
+     * @for Module
+     * @chainable
+     * @param {string} name Name of value
+     * @param {*} value Value you want available for injection
+     * @return {Module}
+     */
     this.value = function(name, value) {
         return addInjectable(name, function() {
             return value;

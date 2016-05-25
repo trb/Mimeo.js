@@ -70,6 +70,47 @@ describe('Routing', function() {
         expect(routeExecuted).to.be.true;
     });
 
+    it('should match route parameters and decode query string', function() {
+        let targetNode = {};
+        let $context;
+
+        $window.location.href = '/test/example?a=b&c=1&c=2&c=3';
+        $window.document.getElementById = () => targetNode;
+
+        router.set('/test/:name', 'elementId', function($innerContext) {
+            $context = $innerContext;
+        });
+
+        $window.onload();
+
+        expect($context.query).to.deep.equal({
+            a: 'b',
+            c: ['1', '2', '3']
+        });
+
+        expect($context.params).to.deep.equal({
+            name: 'example'
+        });
+    });
+
+    it('should match a sub-path', function() {
+        let targetNode = {};
+        let $context;
+
+        $window.location.href = '/test/a/b/c/d';
+        $window.document.getElementById = () => targetNode;
+
+        router.set('/test/*path', 'elementId', function($innerContext) {
+            $context = $innerContext;
+        });
+
+        $window.onload();
+
+        expect($context.params).to.deep.equal({
+            path: 'a/b/c/d'
+        });
+    });
+
     it('should do nothing if the route is not matched', function() {
         let targetNode = {};
 

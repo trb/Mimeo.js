@@ -1,4 +1,94 @@
-'use strict';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>src/builtins/Http.js - Mimeo Public API Documentation</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/3.9.1/build/cssgrids/cssgrids-min.css">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="../assets/css/main.css" id="site_styles">
+    <link rel="icon" href="../assets/favicon.ico">
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+
+<div id="doc">
+    <div id="hd" class="yui3-g header">
+        <div class="yui3-u-3-4">
+                <h1><img src="../mimeo-logo.png" title="Mimeo Public API Documentation"></h1>
+        </div>
+        <div class="yui3-u-1-4 version">
+            <em>API Docs for: 0.0.1</em>
+        </div>
+    </div>
+    <div id="bd" class="yui3-g">
+
+        <div class="yui3-u-1-4">
+            <div id="docs-sidebar" class="sidebar apidocs">
+                <div id="api-list">
+                    <h2 class="off-left">APIs</h2>
+                    <div id="api-tabview" class="tabview">
+                        <ul class="tabs">
+                            <li><a href="#api-classes">Classes</a></li>
+                            <li><a href="#api-modules">Modules</a></li>
+                        </ul>
+                
+                        <div id="api-tabview-filter">
+                            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+                        </div>
+                
+                        <div id="api-tabview-panel">
+                            <ul id="api-classes" class="apis classes">
+                                <li><a href="../classes/$http.html">$http</a></li>
+                                <li><a href="../classes/$q.html">$q</a></li>
+                                <li><a href="../classes/$routing.html">$routing</a></li>
+                                <li><a href="../classes/Deferred.html">Deferred</a></li>
+                                <li><a href="../classes/Mimeo.html">Mimeo</a></li>
+                                <li><a href="../classes/Module.html">Module</a></li>
+                                <li><a href="../classes/Promise.html">Promise</a></li>
+                            </ul>
+                
+                
+                            <ul id="api-modules" class="apis modules">
+                                <li><a href="../modules/Builtins.html">Builtins</a></li>
+                                <li><a href="../modules/Mimeo.html">Mimeo</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="yui3-u-3-4">
+                <div id="api-options">
+                    Show:
+                    <label for="api-show-inherited">
+                        <input type="checkbox" id="api-show-inherited" checked>
+                        Inherited
+                    </label>
+            
+                    <label for="api-show-protected">
+                        <input type="checkbox" id="api-show-protected">
+                        Protected
+                    </label>
+            
+                    <label for="api-show-private">
+                        <input type="checkbox" id="api-show-private">
+                        Private
+                    </label>
+                    <label for="api-show-deprecated">
+                        <input type="checkbox" id="api-show-deprecated">
+                        Deprecated
+                    </label>
+            
+                </div>
+            
+            <div class="apidocs">
+                <div id="docs-main">
+                    <div class="content">
+<h1 class="file-heading">File: src/builtins/Http.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+&#x27;use strict&#x27;;
 /**
  * @module Builtins
  */
@@ -7,18 +97,18 @@ var NodeHttp;
 var NodeHttps;
 
 function toQuery(object) {
-    return Object.keys(object).map((key) => {
-        if (Object.prototype.toString.call(object[key]) == '[object Array]') {
+    return Object.keys(object).map((key) =&gt; {
+        if (Object.prototype.toString.call(object[key]) == &#x27;[object Array]&#x27;) {
             return object[key]
-                .map((arrayValue) => encodeURI(key) + '=' + encodeURI(arrayValue))
-                .join('&');
-        } else if (Object.prototype.toString.call(object[key]) == '[object Object]') {
-            return encodeURI(key) + '=' + encodeURI(JSON.stringify(object[key]));
+                .map((arrayValue) =&gt; encodeURI(key) + &#x27;=&#x27; + encodeURI(arrayValue))
+                .join(&#x27;&amp;&#x27;);
+        } else if (Object.prototype.toString.call(object[key]) == &#x27;[object Object]&#x27;) {
+            return encodeURI(key) + &#x27;=&#x27; + encodeURI(JSON.stringify(object[key]));
         } else {
-            return encodeURI(key) + '=' + encodeURI(object[key].toString());
+            return encodeURI(key) + &#x27;=&#x27; + encodeURI(object[key].toString());
         }
     })
-        .join('&');
+        .join(&#x27;&amp;&#x27;);
 }
 
 function isJsonContentType(contentType) {
@@ -26,7 +116,7 @@ function isJsonContentType(contentType) {
         return false;
     }
 
-    if (contentType == 'application/x-www-form-urlencoded') {
+    if (contentType == &#x27;application/x-www-form-urlencoded&#x27;) {
         return false;
     }
 
@@ -34,8 +124,8 @@ function isJsonContentType(contentType) {
         return string.substr(0, start.length) == start;
     }
 
-    var textJson = 'text/json';
-    var applicationJson = 'application/json';
+    var textJson = &#x27;text/json&#x27;;
+    var applicationJson = &#x27;application/json&#x27;;
 
     var type = contentType.toLowerCase().trim();
 
@@ -74,9 +164,9 @@ function jQueryLikeRequest(jQueryLike, config, resolve, reject) {
     jQueryLike.ajax({
         type: config.method,
         headers: config.headers,
-        contentType: config.headers['Content-Type'],
+        contentType: config.headers[&#x27;Content-Type&#x27;],
         url: config.url,
-        data: isJsonContentType(config.headers['Content-Type']) ? JSON.stringify(
+        data: isJsonContentType(config.headers[&#x27;Content-Type&#x27;]) ? JSON.stringify(
             config.data) : config.data
     }).then(success, error);
 }
@@ -95,31 +185,31 @@ function zeptoRequest($window) {
 
 function nodeRequest(config, resolve, reject) {
     function configToNode(config) {
-        if (config.host && config.host.indexOf(':') !== -1) {
-            var hostParts = config.host.split(':');
+        if (config.host &amp;&amp; config.host.indexOf(&#x27;:&#x27;) !== -1) {
+            var hostParts = config.host.split(&#x27;:&#x27;);
             var host = hostParts[0];
             var port = hostParts[1];
         } else {
             var host = config.host;
-            var port = '80';
+            var port = &#x27;80&#x27;;
         }
 
         if (!host) {
-            throw new Error('When using nodes http libraries, you have to set $http.$host, otherwise node does not know where to send the request to');
+            throw new Error(&#x27;When using nodes http libraries, you have to set $http.$host, otherwise node does not know where to send the request to&#x27;);
         }
 
         return {
             method: config.method,
-            path: config.protocol + '://' + config.host + config.url,
+            path: config.protocol + &#x27;://&#x27; + config.host + config.url,
             headers: config.headers,
             host: host,
             port: port,
-            protocol: config.protocol + ':'
+            protocol: config.protocol + &#x27;:&#x27;
         }
     }
 
     function switchByProtocol() {
-        if (config.protocol === 'http') {
+        if (config.protocol === &#x27;http&#x27;) {
             return NodeHttp;
         } else {
             return NodeHttps;
@@ -132,24 +222,24 @@ function nodeRequest(config, resolve, reject) {
 
     var request = switchByProtocol().request(configToNode(config),
         function(response) {
-            response.setEncoding('utf8');
+            response.setEncoding(&#x27;utf8&#x27;);
 
-            var body = '';
-            response.on('data', function(chunk) {
+            var body = &#x27;&#x27;;
+            response.on(&#x27;data&#x27;, function(chunk) {
                 body += chunk.toString();
             });
 
-            response.on('error', function(error) {
+            response.on(&#x27;error&#x27;, function(error) {
                 reject(error);
             });
 
-            response.on('end', function() {
+            response.on(&#x27;end&#x27;, function() {
                 /*
                  * jQuery will parse JSON replies automatically, so replicate that
                  * behaviour for nodejs
                  */
-                if (body && response.headers['content-type']) {
-                    var type = response.headers['content-type'].toLowerCase().trim();
+                if (body &amp;&amp; response.headers[&#x27;content-type&#x27;]) {
+                    var type = response.headers[&#x27;content-type&#x27;].toLowerCase().trim();
 
                     if (isJsonContentType(type)) {
                         body = JSON.parse(body);
@@ -167,9 +257,9 @@ function nodeRequest(config, resolve, reject) {
         }
     );
 
-    if (config.method === 'POST' || config.method === 'PUT' || config.method === 'PATCH') {
+    if (config.method === &#x27;POST&#x27; || config.method === &#x27;PUT&#x27; || config.method === &#x27;PATCH&#x27;) {
         if (config.data) {
-            if (isJsonContentType(config.headers['Content-Type'])) {
+            if (isJsonContentType(config.headers[&#x27;Content-Type&#x27;])) {
                 request.write(jsonEncode(config.data));
             } else {
                 request.write(config.data);
@@ -189,7 +279,7 @@ function vendorSpecificRequest($window) {
         } else if ($window.Zepto) {
             return zeptoRequest($window);
         } else {
-            throw new Error('No supported xhr library found (jQuery or Zepto are supported)');
+            throw new Error(&#x27;No supported xhr library found (jQuery or Zepto are supported)&#x27;);
         }
     }
 }
@@ -198,11 +288,11 @@ function Http($window, $q, config) {
     var defer = $q.defer();
 
     if (config.params) {
-        if (config.url.indexOf('?') === -1) {
-            config.url += '?';
+        if (config.url.indexOf(&#x27;?&#x27;) === -1) {
+            config.url += &#x27;?&#x27;;
         } else {
-            if (config.url[config.url.length - 1] != '&') {
-                config.url += '&';
+            if (config.url[config.url.length - 1] != &#x27;&amp;&#x27;) {
+                config.url += &#x27;&amp;&#x27;;
             }
         }
 
@@ -225,8 +315,8 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
 
     function clone(object) {
         let newObject = {};
-        Object.keys(object).forEach((key) => {
-            if (object[key].toString() == '[object Object]') {
+        Object.keys(object).forEach((key) =&gt; {
+            if (object[key].toString() == &#x27;[object Object]&#x27;) {
                 newObject[key] = clone(object[key]);
             } else {
                 newObject[key] = object[key];
@@ -238,8 +328,8 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
 
     function mergeConfig(defaultConfig, userConfig) {
         let targetConfig = clone(defaultConfig);
-        Object.keys(userConfig).forEach((key) => {
-            if (userConfig[key].toString() == '[object Object]') {
+        Object.keys(userConfig).forEach((key) =&gt; {
+            if (userConfig[key].toString() == &#x27;[object Object]&#x27;) {
                 targetConfig[key] = mergeConfig(targetConfig[key],
                     userConfig[key]);
             } else {
@@ -260,19 +350,19 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
      * and http method:
      *
      *      $http({
-     *          url: '/example',
-     *          method: 'GET'
+     *          url: &#x27;/example&#x27;,
+     *          method: &#x27;GET&#x27;
      *      });
      *
      * For common http methods there are shorthand functions:
      *
-     *      $http.get('/url');
-     *      $http.post('/example', { key: 'value' });
+     *      $http.get(&#x27;/url&#x27;);
+     *      $http.post(&#x27;/example&#x27;, { key: &#x27;value&#x27; });
      *
      * Both variations will return a Promise that resolves with the response
      * from the server:
      *
-     *      $http.get('/example').then((response) => {
+     *      $http.get(&#x27;/example&#x27;).then((response) =&gt; {
      *          console.log(response.data);
      *      });
      *
@@ -281,107 +371,107 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
      *      {
      *          data: {},
      *          //Data is the response body. If response content type is
-     *          //'application/json' the response body will be JSON decoded and
-     *          //the decoded object will be accessible in `data`
+     *          //&#x27;application/json&#x27; the response body will be JSON decoded and
+     *          //the decoded object will be accessible in &#x60;data&#x60;
      *          status: 200, // http response code,
      *          headers: {
-     *              'Content-Type': 'application/json'
+     *              &#x27;Content-Type&#x27;: &#x27;application/json&#x27;
      *          },// response http-headers,
      *          config: config, // config object send with request
-     *          statusText: '200 Success' // http status text
+     *          statusText: &#x27;200 Success&#x27; // http status text
      *      }
      *
      * All shorthand-methods are documented separately and optionally accept
-     * the same config-object `$http` as a function accepts. Should the config
+     * the same config-object &#x60;$http&#x60; as a function accepts. Should the config
      * object contain different data than the arguments for the shorthand
      * method, then the arguments to the method take precedent:
      *
-     *      $http.get('/example', {}, { url: '/not-used' });
-     *      //=> Sends request to '/example'
+     *      $http.get(&#x27;/example&#x27;, {}, { url: &#x27;/not-used&#x27; });
+     *      //=&gt; Sends request to &#x27;/example&#x27;
      *
      * ## Configuration
      *
      * The config object can have these keys:
      *
      *      {
-     *          method: 'GET',
-     *          url: '/example',
+     *          method: &#x27;GET&#x27;,
+     *          url: &#x27;/example&#x27;,
      *          data: {
-     *              key: 'value'
+     *              key: &#x27;value&#x27;
      *          },
      *          params: {
-     *              search: 'a search criteria'
+     *              search: &#x27;a search criteria&#x27;
      *          },
      *          headers: {
-     *              'Content-Type': 'application/json'
+     *              &#x27;Content-Type&#x27;: &#x27;application/json&#x27;
      *          }
      *      }
      *
-     * Default settings can be set directly on `$http` and will be used for all
+     * Default settings can be set directly on &#x60;$http&#x60; and will be used for all
      * future requests:
      *
-     *      mimeo.module('example', [])
-     *          .run(['$http', ($http) => {
-     *              $http.$config.headers['Authorization'] = 'Basic W@3jolb2'
+     *      mimeo.module(&#x27;example&#x27;, [])
+     *          .run([&#x27;$http&#x27;, ($http) =&gt; {
+     *              $http.$config.headers[&#x27;Authorization&#x27;] = &#x27;Basic W@3jolb2&#x27;
      *          });
      *
      * If you change values in the headers-object make sure not to override the
-     * headers object or if you do, to provide a 'Content-Type' header,
+     * headers object or if you do, to provide a &#x27;Content-Type&#x27; header,
      * otherwise requests might fail depending on the environment (unspecified
      * content types should be avoided).
      *
-     * The `data` field is send as the request body and the `params` key is
-     * send as a query string in the url. The `headers` field allows you to set
+     * The &#x60;data&#x60; field is send as the request body and the &#x60;params&#x60; key is
+     * send as a query string in the url. The &#x60;headers&#x60; field allows you to set
      * http headers for only this request, usually used to set a content type.
      *
-     * The default content type is 'application/json', so by default, `data`
+     * The default content type is &#x27;application/json&#x27;, so by default, &#x60;data&#x60;
      * will be send as a JSON string to the server. If you want to send a
      * browser-like form string (content type
-     * 'application/x-www-form-urlencoded') you have to set the content type
-     * in the `headers` field and `data` must be a string. It's up to you to
+     * &#x27;application/x-www-form-urlencoded&#x27;) you have to set the content type
+     * in the &#x60;headers&#x60; field and &#x60;data&#x60; must be a string. It&#x27;s up to you to
      * build the form-urlencoded string.
      *
      * ## Defaults
      *
-     * The default values `$http` uses can be changed and will be applied to
+     * The default values &#x60;$http&#x60; uses can be changed and will be applied to
      * every request. There are three configurable properties:
      *
-     * - `$http.$host`
-     * - `$http.$protocol`
-     * - `$http.$config`
+     * - &#x60;$http.$host&#x60;
+     * - &#x60;$http.$protocol&#x60;
+     * - &#x60;$http.$config&#x60;
      *
-     * `$http.$host` is the host that will be used for every request. By
+     * &#x60;$http.$host&#x60; is the host that will be used for every request. By
      * default, no host is used. For use in the browser this is fine, as the
-     * browser simply uses the current host. For use with NodeJS `$http.$host`
+     * browser simply uses the current host. For use with NodeJS &#x60;$http.$host&#x60;
      * has to be set as there is not default host. Setting the host for the
      * browser will send all requests to the specified host, and not the
      * current host. In that case the host has to support
      * [cross-origin HTTP
      * requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS).
      *
-     * `$http.$protocol` should be one of 'http' or 'https', depending on what
+     * &#x60;$http.$protocol&#x60; should be one of &#x27;http&#x27; or &#x27;https&#x27;, depending on what
      * your app uses.
      *
-     * `$http.$config` is merged into the config object passed to `$http` or
+     * &#x60;$http.$config&#x60; is merged into the config object passed to &#x60;$http&#x60; or
      * one
      * of the shorthand methods. The settings in the config object passed to
-     * `$http` or the shorthand method takes precedent:
+     * &#x60;$http&#x60; or the shorthand method takes precedent:
      *
-     *      $http.$config.headers['Authorization'] = 'Basic F@L#B';
-     *      $http.post('/example', { key: 'value' }, {
+     *      $http.$config.headers[&#x27;Authorization&#x27;] = &#x27;Basic F@L#B&#x27;;
+     *      $http.post(&#x27;/example&#x27;, { key: &#x27;value&#x27; }, {
      *          headers: {
-     *              'Authorization': 'None'
+     *              &#x27;Authorization&#x27;: &#x27;None&#x27;
      *          }
      *      );
-     *      //=> Will send 'None' as the 'Authorization' header.
+     *      //=&gt; Will send &#x27;None&#x27; as the &#x27;Authorization&#x27; header.
      *
      * An example changing all the available properties:
      *
-     *      mimeo.module('example', [])
-     *          .run(['$http', ($http) => {
-     *              $http.$host = 'http://www.example.com';
-     *              $http.$protocol = 'https';
-     *              $http.$config.headers['Authorization'] = 'Basic F@L#B'
+     *      mimeo.module(&#x27;example&#x27;, [])
+     *          .run([&#x27;$http&#x27;, ($http) =&gt; {
+     *              $http.$host = &#x27;http://www.example.com&#x27;;
+     *              $http.$protocol = &#x27;https&#x27;;
+     *              $http.$config.headers[&#x27;Authorization&#x27;] = &#x27;Basic F@L#B&#x27;
      *          });
      *
      * @class $http
@@ -405,12 +495,12 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
      * @for $http
      * @type {string}
      */
-    doHttp.$host = '';
-    doHttp.$protocol = 'https';
+    doHttp.$host = &#x27;&#x27;;
+    doHttp.$protocol = &#x27;https&#x27;;
     doHttp.$config = {
-        method: 'GET',
+        method: &#x27;GET&#x27;,
         headers: {
-            'Content-Type': 'application/json'
+            &#x27;Content-Type&#x27;: &#x27;application/json&#x27;
         }
     };
 
@@ -428,7 +518,7 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
     doHttp.get = function(url, params, config) {
         config = mergeConfig(doHttp.$config, config || {});
         config.url = url;
-        config.method = 'GET';
+        config.method = &#x27;GET&#x27;;
         config.params = params;
         config.protocol = doHttp.$protocol;
         config.host = doHttp.$host;
@@ -450,7 +540,7 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
     doHttp.head = function(url, params, config) {
         config = mergeConfig(doHttp.$config, config || {});
         config.url = url;
-        config.method = 'HEAD';
+        config.method = &#x27;HEAD&#x27;;
         config.params = params;
         config.protocol = doHttp.$protocol;
         config.host = doHttp.$host;
@@ -459,7 +549,7 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
     };
 
     /**
-     * Send a POST request. By default, `data` will be JSON encoded and send as
+     * Send a POST request. By default, &#x60;data&#x60; will be JSON encoded and send as
      * the request body.
      *
      * @method post
@@ -467,7 +557,7 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
      * @static
      * @param {string} url Url you want to send request to
      * @param {object} [data] Object to send as request body. If content-type
-     * is set to 'application/json' (which is the default), `data` will be
+     * is set to &#x27;application/json&#x27; (which is the default), &#x60;data&#x60; will be
      * JSON-encoded before sending
      * @param {object} [config] Config for this request
      * @returns {Promise}
@@ -475,7 +565,7 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
     doHttp.post = function(url, data, config) {
         config = mergeConfig(doHttp.$config, config || {});
         config.url = url;
-        config.method = 'POST';
+        config.method = &#x27;POST&#x27;;
         config.data = data;
         config.protocol = doHttp.$protocol;
         config.host = doHttp.$host;
@@ -484,7 +574,7 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
     };
 
     /**
-     * Send a PUT request. By default, `data` will be JSON encoded and send as
+     * Send a PUT request. By default, &#x60;data&#x60; will be JSON encoded and send as
      * the request body.
      *
      * @method put
@@ -492,7 +582,7 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
      * @static
      * @param {string} url Url you want to send request to
      * @param {object} [data] Object to send as request body. If content-type
-     * is set to 'application/json' (which is the default), `data` will be
+     * is set to &#x27;application/json&#x27; (which is the default), &#x60;data&#x60; will be
      * JSON-encoded before sending
      * @param {object} [config] Config for this request
      * @returns {Promise}
@@ -500,7 +590,7 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
     doHttp.put = function(url, data, config) {
         config = mergeConfig(doHttp.$config, config || {});
         config.url = url;
-        config.method = 'PUT';
+        config.method = &#x27;PUT&#x27;;
         config.data = data;
         config.protocol = doHttp.$protocol;
         config.host = doHttp.$host;
@@ -509,7 +599,7 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
     };
 
     /**
-     * Send a PATCH request. By default, `data` will be JSON encoded and send as
+     * Send a PATCH request. By default, &#x60;data&#x60; will be JSON encoded and send as
      * the request body.
      *
      * @method patch
@@ -517,7 +607,7 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
      * @static
      * @param {string} url Url you want to send request to
      * @param {object} [data] Object to send as request body. If content-type
-     * is set to 'application/json' (which is the default), `data` will be
+     * is set to &#x27;application/json&#x27; (which is the default), &#x60;data&#x60; will be
      * JSON-encoded before sending
      * @param {object} [config] Config for this request
      * @returns {Promise}
@@ -525,7 +615,7 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
     doHttp.patch = function(url, data, config) {
         config = mergeConfig(doHttp.$config, config || {});
         config.url = url;
-        config.method = 'PATCH';
+        config.method = &#x27;PATCH&#x27;;
         config.data = data;
         config.protocol = doHttp.$protocol;
         config.host = doHttp.$host;
@@ -545,7 +635,7 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
     doHttp.delete = function(url, config) {
         config = mergeConfig(doHttp.$config, config || {});
         config.url = url;
-        config.method = 'DELETE';
+        config.method = &#x27;DELETE&#x27;;
         config.protocol = doHttp.$protocol;
         config.host = doHttp.$host;
         //noinspection JSValidateTypes
@@ -554,3 +644,21 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
 
     return doHttp;
 };
+    </pre>
+</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>
