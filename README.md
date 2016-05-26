@@ -16,7 +16,7 @@ mimeo.bootstrap('greetUser', document.getElementById('greeting'));
 
 Mimeo implements a subset of the Angular Api and built-in services.
 Like a [mimeo](https://en.wikipedia.org/wiki/Mimeograph) of Angular. Gives you
-the dependency-injection goodness without `$scope` and directives.
+the dependency-injection goodness without `$scope` and directives. Check out [the docs](http://trb.github.io/Mimeo.js), in particular [for mimeo and the modules](http://trb.github.io/Mimeo.js/modules/Mimeo.html) and [for the three built-ins, $q, $http and $routing](http://trb.github.io/Mimeo.js/modules/Builtins.html).
 
 The goal is a dependency injection framework for pretty much any rendering
 library. Mimeo does not include any rendering abilities, that's left up to the
