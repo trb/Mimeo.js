@@ -1,8 +1,9 @@
 {
-  "name": "Mimeo.js",
+  "name": "Mimeo",
   "version": "0.0.1",
   "author": "Thomas Rubbert",
   "main": "src/Mimeo.js",
+  "engines": "^0.12.0",
   "scripts": {
     "preintegration-test": "./bin/ensure-xvfb-exists.sh",
     "develop": "npm run server:start; npm run watch:development",
@@ -18,7 +19,6 @@
     "publish:docs": "bin/publish-docs.sh"
   },
   "description": "A dependency-injection frontend framework for small projects that mimics angulars api",
-  "private": true,
   "dependencies": {
     "parseuri": "0.0.4",
     "route-recognizer": "0.1.9"
