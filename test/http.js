@@ -334,6 +334,26 @@ describe('Http', function() {
         }
     );
 
+    it('should add protocol and host to url if both are set',
+        function() {
+            $http.$host = 'localhost:8000';
+            $http.$protocol = 'http';
+
+            $window.$fake = false;
+            $window.jQuery = {
+                ajax: function(config) {
+                    expect(config.url).to.equal('http://localhost:8000/test');
+
+                    return {
+                        then: noOp
+                    }
+                }
+            };
+
+            $http.get('/test');
+        }
+    );
+
     it('should convert a node-response into an angular response', function() {
         $http.$host = 'localhost';
 

@@ -71,11 +71,15 @@ function jQueryLikeRequest(jQueryLike, config, resolve, reject) {
         reject(responseToAngularResponse({}, textStatus, jqXHR));
     }
 
+    var url = config.host && config.protocol
+        ? config.protocol + '://' + config.host + config.url
+        : config.url;
+
     jQueryLike.ajax({
         type: config.method,
         headers: config.headers,
         contentType: config.headers['Content-Type'],
-        url: config.url,
+        url: url,
         data: isJsonContentType(config.headers['Content-Type']) ? JSON.stringify(
             config.data) : config.data
     }).then(success, error);
