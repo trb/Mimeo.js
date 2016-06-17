@@ -105,6 +105,7 @@ var parseUri = require('parseuri');
 function Routing($q, $window) {
     var routing = new RouteRecognizer();
     var defaultRoute;
+    var anyRouteHandled = false;
     var makeRenderer = function(targetAsDOMNode) {
         return function(toRender) {
             targetAsDOMNode.innerHTML = toRender;
@@ -166,6 +167,7 @@ function Routing($q, $window) {
     }
 
     function doRouting(url, doDefault) {
+        anyRouteHandled = true;
         var urlParts = parseUri(url);
         var handlers = routing.recognize(urlParts.path);
         var promises = [];
@@ -227,7 +229,14 @@ function Routing($q, $window) {
     };
 
     $window.onload = function() {
-        doRouting($window.location.href);
+        /*
+         * If a route is handled before .onload is fired (e.g. by calling
+         * .goto()), then don't do routing. This prevents a double-load as the
+         * route has already been handled.
+         */
+        if (!anyRouteHandled) {
+            doRouting($window.location.href);
+        }
     };
 
     return {

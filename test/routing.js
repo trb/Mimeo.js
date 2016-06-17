@@ -70,6 +70,23 @@ describe('Routing', function() {
         expect(routeExecuted).to.be.true;
     });
 
+    it('should not handle a route with .onload if it was already handled', function() {
+        let targetNode = {};
+        let handleCount = 0;
+
+        $window.location.href = '/test';
+        $window.document.getElementById = () => targetNode;
+
+        router.set('/test', 'elementId', function() {
+            ++handleCount;
+        });
+
+        router.goto('/test');
+        $window.onload();
+
+        expect(handleCount).to.equal(1);
+    });
+
     it('should match route parameters and decode query string', function() {
         let targetNode = {};
         let $context;
