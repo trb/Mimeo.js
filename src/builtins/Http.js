@@ -53,11 +53,26 @@ function isJsonContentType(contentType) {
 }
 
 function jQueryLikeRequest(jQueryLike, config, resolve, reject) {
+    function parseJqXHRHeaders(headerString) {
+        if (!headerString) {
+            return;
+        }
+
+        return headerString
+            .split('\n')
+            .filter(line => line.length)
+            .map((line) => line.split(':').map(part => part.trim()))
+            .reduce((headers, [header, value]) => {
+                headers[header] = value;
+                return headers;
+            }, {})
+    }
+
     function responseToAngularResponse(data, _, jqXHR) {
         return {
             data: data,
             status: jqXHR.status, // response code,
-            headers: jqXHR.getAllResponseHeaders(),// headers,
+            headers: parseJqXHRHeaders(jqXHR.getAllResponseHeaders()),
             config: config,
             statusText: jqXHR.statusText
         };

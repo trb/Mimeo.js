@@ -147,7 +147,7 @@ describe('Http', function() {
             $http.$host = 'localhost';
 
             $nodeHttp.request = (config) => {
-                expect(config.path).to.equal('https://localhost/test?a=1&b=2')
+                expect(config.path).to.equal('https://localhost/test?a=1&b=2');
                 return {end: noOp};
             };
 
@@ -160,7 +160,7 @@ describe('Http', function() {
             $http.$host = 'localhost';
 
             $nodeHttp.request = (config) => {
-                expect(config.path).to.equal('https://localhost/test?a=1&b=2')
+                expect(config.path).to.equal('https://localhost/test?a=1&b=2');
                 return {end: noOp};
             };
 
@@ -238,9 +238,7 @@ describe('Http', function() {
                             status: 200,
                             statusText: 'success',
                             responseText: '{"a": "1"}',
-                            getAllResponseHeaders: () => {
-                                return {'Content-Type': 'application/json'}
-                            },
+                            getAllResponseHeaders: () => 'Content-Type: application/json',
                             getResponseHeader: () => 'application/json',
                             statusCode: () => 200
                         })
@@ -262,6 +260,35 @@ describe('Http', function() {
                     protocol: 'https',
                     host: ''
                 });
+            });
+        }
+    );
+
+    it('should parse headers from a jQuery-like response',
+        function() {
+            $window.$fake = false;
+            $window.jQuery = {
+                ajax: function() {
+                    return {
+                        then: (success) => success({a: '1'}, 'success', {
+                            readyState: 'completed',
+                            status: 200,
+                            statusText: 'success',
+                            responseText: '{"a": "1"}',
+                            getAllResponseHeaders: () => {
+                                return 'Content-Type: application/json\n'
+                                    + 'Test: Header';
+                            },
+                            getResponseHeader: () => 'application/json',
+                            statusCode: () => 200
+                        })
+                    }
+                }
+            };
+
+            $http.get('/test').then((response) => {
+                expect(response.headers['Content-Type']).to.equal('application/json');
+                expect(response.headers['Test']).to.equal('Header');
             });
         }
     );
@@ -288,9 +315,7 @@ describe('Http', function() {
                             status: 200,
                             statusText: 'success',
                             responseText: '{"a": "1"}',
-                            getAllResponseHeaders: () => {
-                                return {'Content-Type': 'application/json'}
-                            },
+                            getAllResponseHeaders: () => 'Content-Type: application/json',
                             getResponseHeader: () => 'application/json',
                             statusCode: () => 200
                         })
