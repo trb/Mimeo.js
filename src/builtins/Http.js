@@ -229,7 +229,9 @@ function Http($window, $q, config) {
         delete config.params;
     }
 
+    config = config.pre.reduce((config, callback) => callback(config), config);
     vendorSpecificRequest($window)(config, function(data) {
+        data = config.post.reduce((data, callback) => callback(data), data);
         defer.resolve(data);
     }, function(error) {
         defer.reject(error);
@@ -323,6 +325,8 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
      * The config object can have these keys:
      *
      *      {
+     *          pre: [],
+     *          post: [],
      *          method: 'GET',
      *          url: '/example',
      *          data: {
@@ -344,10 +348,23 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
      *              $http.$config.headers['Authorization'] = 'Basic W@3jolb2'
      *          });
      *
+     * `pre` and `post` are callback-chains that can
+     *      1. Modify the config before a request (in case of `pre`)
+     *      2. Modify the response (in case of `post`)
+     *
+     * To add callbacks simply push them to the array. It's up to you to manage
+     * the chain and add/remove functions from the array.
+     *
+     * The function itself will receive the config for the request (for `pre`)
+     * or the response (for `post`). The functions in the chain will receive
+     * the return value from the previous function as input. The first function
+     * will receive the original config/response as input.
+     *
      * If you change values in the headers-object make sure not to override the
      * headers object or if you do, to provide a 'Content-Type' header,
      * otherwise requests might fail depending on the environment (unspecified
-     * content types should be avoided).
+     * content types should be avoided). Instead, simply add or modify headers
+     * on the existing headers object.
      *
      * The `data` field is send as the request body and the `params` key is
      * send as a query string in the url. The `headers` field allows you to set
@@ -427,6 +444,8 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
     doHttp.$host = '';
     doHttp.$protocol = 'https';
     doHttp.$config = {
+        pre: [],
+        post: [],
         method: 'GET',
         headers: {
             'Content-Type': 'application/json'

@@ -17,7 +17,7 @@
                 <h1><img src="../mimeo-logo.png" title="Mimeo Public API Documentation"></h1>
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.0.1</em>
+            <em>API Docs for: 0.0.4</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -89,7 +89,7 @@
 
 
         <div class="foundat">
-            Defined in: <a href="../files/src_builtins_Http.js.html#l253"><code>src&#x2F;builtins&#x2F;Http.js:253</code></a>
+            Defined in: <a href="../files/src_builtins_Http.js.html#l274"><code>src&#x2F;builtins&#x2F;Http.js:274</code></a>
         </div>
 
             Module: <a href="../modules/Builtins.html">Builtins</a>
@@ -142,6 +142,8 @@ method, then the arguments to the method take precedent:</p>
 <h2>Configuration</h2>
 <p>The config object can have these keys:</p>
 <pre class="code prettyprint"><code> {
+     pre: [],
+     post: [],
      method: 'GET',
      url: '/example',
      data: {
@@ -162,10 +164,20 @@ future requests:</p>
          $http.$config.headers['Authorization'] = 'Basic W@3jolb2'
      });
 </code></pre>
+<p><code>pre</code> and <code>post</code> are callback-chains that can
+1. Modify the config before a request (in case of <code>pre</code>)
+2. Modify the response (in case of <code>post</code>)</p>
+<p>To add callbacks simply push them to the array. It's up to you to manage
+the chain and add/remove functions from the array.</p>
+<p>The function itself will receive the config for the request (for <code>pre</code>)
+or the response (for <code>post</code>). The functions in the chain will receive
+the return value from the previous function as input. The first function
+will receive the original config/response as input.</p>
 <p>If you change values in the headers-object make sure not to override the
 headers object or if you do, to provide a 'Content-Type' header,
 otherwise requests might fail depending on the environment (unspecified
-content types should be avoided).</p>
+content types should be avoided). Instead, simply add or modify headers
+on the existing headers object.</p>
 <p>The <code>data</code> field is send as the request body and the <code>params</code> key is
 send as a query string in the url. The <code>headers</code> field allows you to set
 http headers for only this request, usually used to set a content type.</p>
@@ -241,7 +253,7 @@ of the shorthand methods. The settings in the config object passed to
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_builtins_Http.js.html#l253"><code>src&#x2F;builtins&#x2F;Http.js:253</code></a>
+        <a href="../files/src_builtins_Http.js.html#l274"><code>src&#x2F;builtins&#x2F;Http.js:274</code></a>
         </p>
 
 
@@ -375,7 +387,7 @@ of the shorthand methods. The settings in the config object passed to
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_builtins_Http.js.html#l534"><code>src&#x2F;builtins&#x2F;Http.js:534</code></a>
+        <a href="../files/src_builtins_Http.js.html#l572"><code>src&#x2F;builtins&#x2F;Http.js:572</code></a>
         </p>
 
 
@@ -459,7 +471,7 @@ with the request, as the URL should identify the entity to delete</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_builtins_Http.js.html#l417"><code>src&#x2F;builtins&#x2F;Http.js:417</code></a>
+        <a href="../files/src_builtins_Http.js.html#l455"><code>src&#x2F;builtins&#x2F;Http.js:455</code></a>
         </p>
 
 
@@ -554,7 +566,7 @@ with the request, as the URL should identify the entity to delete</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_builtins_Http.js.html#l439"><code>src&#x2F;builtins&#x2F;Http.js:439</code></a>
+        <a href="../files/src_builtins_Http.js.html#l477"><code>src&#x2F;builtins&#x2F;Http.js:477</code></a>
         </p>
 
 
@@ -649,7 +661,7 @@ with the request, as the URL should identify the entity to delete</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_builtins_Http.js.html#l511"><code>src&#x2F;builtins&#x2F;Http.js:511</code></a>
+        <a href="../files/src_builtins_Http.js.html#l549"><code>src&#x2F;builtins&#x2F;Http.js:549</code></a>
         </p>
 
 
@@ -747,7 +759,7 @@ JSON-encoded before sending</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_builtins_Http.js.html#l461"><code>src&#x2F;builtins&#x2F;Http.js:461</code></a>
+        <a href="../files/src_builtins_Http.js.html#l499"><code>src&#x2F;builtins&#x2F;Http.js:499</code></a>
         </p>
 
 
@@ -845,7 +857,7 @@ JSON-encoded before sending</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_builtins_Http.js.html#l486"><code>src&#x2F;builtins&#x2F;Http.js:486</code></a>
+        <a href="../files/src_builtins_Http.js.html#l524"><code>src&#x2F;builtins&#x2F;Http.js:524</code></a>
         </p>
 
 
@@ -928,7 +940,7 @@ JSON-encoded before sending</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_builtins_Http.js.html#l400"><code>src&#x2F;builtins&#x2F;Http.js:400</code></a>
+        <a href="../files/src_builtins_Http.js.html#l436"><code>src&#x2F;builtins&#x2F;Http.js:436</code></a>
         </p>
 
 

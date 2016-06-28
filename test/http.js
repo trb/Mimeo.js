@@ -253,6 +253,8 @@ describe('Http', function() {
                 expect(response.statusText).to.equal('success');
                 expect(response.status).to.equal(200);
                 expect(response.config).to.deep.equal({
+                    pre: [],
+                    post: [],
                     method: 'GET',
                     headers: {'Content-Type': 'application/json'},
                     url: '/test',
@@ -289,6 +291,54 @@ describe('Http', function() {
             $http.get('/test').then((response) => {
                 expect(response.headers['Content-Type']).to.equal('application/json');
                 expect(response.headers['Test']).to.equal('Header');
+            });
+        }
+    );
+
+    it('should should alter request/response via pre/post callbacks',
+        function() {
+            $window.$fake = false;
+            $window.jQuery = {
+                ajax: function(config) {
+                    expect(config.headers['X-Test-1']).to.equal('1');
+                    expect(config.headers['X-Test-2']).to.equal('2');
+
+                    return {
+                        then: (success) => success({a: '1'}, 'success', {
+                            readyState: 'completed',
+                            status: 200,
+                            statusText: 'success',
+                            responseText: '{"a": "1"}',
+                            getAllResponseHeaders: () => {
+                                return 'Content-Type: application/json\n';
+                            },
+                            getResponseHeader: () => 'application/json',
+                            statusCode: () => 200
+                        })
+                    }
+                }
+            };
+
+            $http.$config.pre.push((config) => {
+                config.headers['X-Test-1'] = '1';
+                return config;
+            });
+            $http.$config.pre.push((config) => {
+                config.headers['X-Test-2'] = '2';
+                return config;
+            });
+            $http.$config.post.push((response) => {
+                response.headers['X-Test-3'] = '3';
+                return response;
+            });
+            $http.$config.post.push((response) => {
+                response.headers['X-Test-4'] = '4';
+                return response;
+            });
+
+            $http.get('/test').then((response) => {
+                expect(response.headers['X-Test-3']).to.equal('3');
+                expect(response.headers['X-Test-4']).to.equal('4');
             });
         }
     );
@@ -415,6 +465,8 @@ describe('Http', function() {
             expect(response.data).to.deep.equal({a: '1'});
             expect(response.headers).to.deep.equal({'content-type': 'application/json'});
             expect(response.config).to.deep.equal({
+                pre: [],
+                post: [],
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 url: '/test',
