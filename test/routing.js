@@ -275,7 +275,7 @@ describe('Routing', function() {
         let eventTarget = {
             href: '/test',
             'data-internal': true,
-            attributes: [],
+            attributes: []
         };
 
         $window.location.href = '/';
@@ -290,6 +290,59 @@ describe('Routing', function() {
         });
 
         expect(routeExecuted).to.be.true;
+    });
+
+    it('should match a route after a click on a descendant', function() {
+        let routeExecuted = false;
+        let targetNode = {};
+        let eventTarget = {
+            attributes: [],
+            parentNode: {
+                parentNode: {
+                    'data-internal': true,
+                    href: '/test'
+                }
+            }
+        };
+
+        $window.location.href = '/';
+        $window.document.getElementById = () => targetNode;
+
+        router.set('/test', 'elementId', function() {
+            routeExecuted = true;
+        });
+
+        $window.onclick({
+            target: eventTarget
+        });
+
+        expect(routeExecuted).to.be.true;
+    });
+
+    it('should ignore a click on a that does not have an ancestor with data-internal', function() {
+        let routeExecuted = false;
+        let targetNode = {};
+        let eventTarget = {
+            attributes: [],
+            parentNode: {
+                parentNode: {
+                    href: '/test'
+                }
+            }
+        };
+
+        $window.location.href = '/';
+        $window.document.getElementById = () => targetNode;
+
+        router.set('/test', 'elementId', function() {
+            routeExecuted = true;
+        });
+
+        $window.onclick({
+            target: eventTarget
+        });
+
+        expect(routeExecuted).to.be.false;
     });
 
     it('should support getAttributes() on DOMNode', function() {
@@ -307,7 +360,7 @@ describe('Routing', function() {
                     default:
                         return undefined;
                 }
-            },
+            }
         };
 
         $window.location.href = '/';

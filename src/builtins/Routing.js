@@ -132,6 +132,10 @@ function Routing($q, $window) {
             return element.getAttribute(attribute);
         }
 
+        if (!element.attributes) {
+            return null;
+        }
+
         var value = null;
         for (var i = 0; i < element.attributes.length; ++i) {
             if (element.attributes[i].nodeName === attribute) {
@@ -140,6 +144,18 @@ function Routing($q, $window) {
         }
 
         return value;
+    }
+
+    function getAncestorWithAttribute(node, attribute) {
+        if (!node) {
+            return null;
+        }
+
+        if (getAttribute(node, attribute) !== null) {
+            return node;
+        }
+
+        return getAncestorWithAttribute(node.parentNode, attribute);
     }
 
     function doDefaultRoute(route) {
@@ -217,9 +233,15 @@ function Routing($q, $window) {
             target = target.parentNode;
         }
 
-        if (getAttribute(target, 'data-internal') !== null) {
-            preventDefault(event);
+        /*
+         * Other elements might be inside an a-tag which end up as event.target,
+         * so we need to walk the parent nodes to find the a-tag with the 'src'
+         * attribute
+         */
+        target = getAncestorWithAttribute(target, 'data-internal');
 
+        if (target && getAttribute(target, 'data-internal') !== null) {
+            preventDefault(event);
             if (getAttribute(target, 'data-no-history') !== null) {
                 replaceRoute(getAttribute(target, 'href'));
             } else {
