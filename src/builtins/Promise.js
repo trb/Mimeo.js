@@ -62,9 +62,13 @@ function Promise() {
                 function rejectionWrapper(rejectWith) {
                     if (isFunction(onReject)) {
                         onReject(rejectWith);
+                    } else {
+                        /*
+                         * Stop rejecting the promise chain once the rejection
+                         * has been handled.
+                         */
+                        promise.reject(rejectWith);
                     }
-
-                    promise.reject(rejectWith);
                 }
 
                 if (state === 'rejected') {

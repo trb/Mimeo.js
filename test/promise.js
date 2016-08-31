@@ -30,7 +30,7 @@ describe('Promise', function() {
         });
     });
 
-    it('should enable multiple deferres to resolve individually',
+    it('should enable multiple defers to resolve individually',
         function(done) {
             var promiseA = $q(function(resolve) {
                 setTimeout(function() {
@@ -305,6 +305,56 @@ describe('Promise', function() {
                 });
 
             return q;
+        }
+    );
+
+    it('should end promise chains if a rejection is handled', function() {
+        var deferred = $q.defer();
+
+        var caughtError;
+        var resolveExecuted = false;
+        var chainExecuted = false;
+        deferred.promise
+            .then(function() {
+                resolveExecuted = true;
+            }, function(error) {
+                caughtError = error;
+            })
+            .then(function() {}, function() {
+                chainExecuted = true;
+            });
+
+        deferred.reject('Error');
+
+        expect(caughtError).to.equal('Error');
+        expect(resolveExecuted).to.be.false;
+        expect(chainExecuted).to.be.false;
+    });
+
+    it('should reject the chain until a rejection handler is found',
+        function() {
+            var deferred = $q.defer();
+
+            var resolveExecuted = false;
+            var resolve2Executed = false;
+            var caughtError;
+
+            deferred.promise
+                .then(function() {
+                    resolveExecuted = true;
+                })
+                .then(function() {
+                    resolve2Executed = true;
+                })
+                .catch(function(error) {
+                    caughtError = error;
+                });
+
+            deferred.reject('Error');
+
+            expect(resolveExecuted).to.be.false;
+            expect(resolve2Executed).to.be.false;
+            expect(caughtError).to.equal('Error');
         }
     );
 });
