@@ -1,6 +1,6 @@
 {
   "name": "mimeo-framework",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "Thomas Rubbert",
   "main": "src/Mimeo.js",
   "engines": "^0.12.0",

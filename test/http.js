@@ -343,6 +343,35 @@ describe('Http', function() {
         }
     );
 
+    it('should execute post-callbacks on non-200 responses', () => {
+        var executed = false;
+        $window.$fake = false;
+        $window.jQuery = {
+            ajax: function() {
+                return {
+                    then: (_, error) => error({
+                        readyState: 'completed',
+                        status: 401,
+                        statusText: 'error',
+                        getAllResponseHeaders: () => {
+                            return 'Content-Type: application/json\n';
+                        },
+                        getResponseHeader: () => 'application/json',
+                        statusCode: () => 401
+                    }, 'error')
+                }
+            }
+        };
+
+        $http.$config.post.push((response) => {
+            executed = true;
+        });
+
+        $http.get('/test');
+
+        expect(executed, 'executed').to.be.true;
+    });
+
     it('should reset config object between requests',
         function() {
             $window.$fake = false;

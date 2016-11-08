@@ -234,6 +234,7 @@ function Http($window, $q, config) {
         data = config.post.reduce((data, callback) => callback(data), data);
         defer.resolve(data);
     }, function(error) {
+        error = config.post.reduce((error, callback) => callback(error), error);
         defer.reject(error);
     });
 
