@@ -17,7 +17,7 @@
                 <h1><img src="../mimeo-logo.png" title="Mimeo Public API Documentation"></h1>
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.0.1</em>
+            <em>API Docs for: 0.1.4</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -203,6 +203,10 @@ is created.</p>
 
                             </li>
                             <li class="index-item method">
+                                <a href="#method_onRouting">onRouting</a>
+
+                            </li>
+                            <li class="index-item method">
                                 <a href="#method_set">set</a>
 
                             </li>
@@ -248,7 +252,7 @@ is created.</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_builtins_Routing.js.html#l436"><code>src&#x2F;builtins&#x2F;Routing.js:436</code></a>
+        <a href="../files/src_builtins_Routing.js.html#l500"><code>src&#x2F;builtins&#x2F;Routing.js:500</code></a>
         </p>
 
 
@@ -320,6 +324,70 @@ from all matched routes</p>
             </div>
         </div>
 </div>
+<div id="method_onRouting" class="method item">
+    <h3 class="name"><code>onRouting</code></h3>
+
+        <div class="args">
+            <span class="paren">(</span><ul class="args-list inline commas">
+                <li class="arg">
+                        <code>handler</code>
+                </li>
+            </ul><span class="paren">)</span>
+        </div>
+
+
+
+
+
+
+
+
+    <div class="meta">
+                <p>
+                Defined in
+        <a href="../files/src_builtins_Routing.js.html#l273"><code>src&#x2F;builtins&#x2F;Routing.js:273</code></a>
+        </p>
+
+
+
+    </div>
+
+    <div class="description">
+        <p>Add event handlers to be executed whenever a new route is handled,
+via <a href="../classes/$routing.html#method_goto" class="crosslink">$routing.goto()</a>,
+the window.onpopstate event or a click on a controlled link.</p>
+
+    </div>
+
+        <div class="params">
+            <h4>Parameters:</h4>
+
+            <ul class="params-list">
+                <li class="param">
+                        <code class="param-name">handler</code>
+                        <span class="type">Function</span>
+
+
+                    <div class="param-description">
+                        <p>The callback to be executed when a new url
+is handled. It receives four parameters:</p>
+<pre><code> - url {string} The url handled (regardless if handlers are found)
+ - parts {object} Parsed url, same as $context.url that's passed
+     to a route handler
+ - handlerExecuted {Boolean} Whether a handler was found and
+     executed
+ - defaultRouteExecuted {Boolean} Whether the url handled was the
+     default route</code></pre>
+
+                    </div>
+
+                </li>
+            </ul>
+        </div>
+
+
+
+</div>
 <div id="method_set" class="method item">
     <h3 class="name"><code>set</code></h3>
 
@@ -350,7 +418,7 @@ from all matched routes</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_builtins_Routing.js.html#l312"><code>src&#x2F;builtins&#x2F;Routing.js:312</code></a>
+        <a href="../files/src_builtins_Routing.js.html#l376"><code>src&#x2F;builtins&#x2F;Routing.js:376</code></a>
         </p>
 
 
@@ -506,7 +574,7 @@ key-value hash. Repeating keys will create an array:
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_builtins_Routing.js.html#l234"><code>src&#x2F;builtins&#x2F;Routing.js:234</code></a>
+        <a href="../files/src_builtins_Routing.js.html#l298"><code>src&#x2F;builtins&#x2F;Routing.js:298</code></a>
         </p>
 
 
@@ -562,7 +630,7 @@ current path wasn't matched by any defined route</p>
     <div class="meta">
                 <p>
                 Defined in
-        <a href="../files/src_builtins_Routing.js.html#l251"><code>src&#x2F;builtins&#x2F;Routing.js:251</code></a>
+        <a href="../files/src_builtins_Routing.js.html#l315"><code>src&#x2F;builtins&#x2F;Routing.js:315</code></a>
         </p>
 
 
