@@ -17,7 +17,7 @@
                 <h1><img src="../mimeo-logo.png" title="Mimeo Public API Documentation"></h1>
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.0.1</em>
+            <em>API Docs for: 0.1.4</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -143,11 +143,26 @@ function isJsonContentType(contentType) {
 }
 
 function jQueryLikeRequest(jQueryLike, config, resolve, reject) {
+    function parseJqXHRHeaders(headerString) {
+        if (!headerString) {
+            return;
+        }
+
+        return headerString
+            .split(&#x27;\n&#x27;)
+            .filter(line =&gt; line.length)
+            .map((line) =&gt; line.split(&#x27;:&#x27;).map(part =&gt; part.trim()))
+            .reduce((headers, [header, value]) =&gt; {
+                headers[header] = value;
+                return headers;
+            }, {})
+    }
+
     function responseToAngularResponse(data, _, jqXHR) {
         return {
             data: data,
             status: jqXHR.status, // response code,
-            headers: jqXHR.getAllResponseHeaders(),// headers,
+            headers: parseJqXHRHeaders(jqXHR.getAllResponseHeaders()),
             config: config,
             statusText: jqXHR.statusText
         };
@@ -161,11 +176,15 @@ function jQueryLikeRequest(jQueryLike, config, resolve, reject) {
         reject(responseToAngularResponse({}, textStatus, jqXHR));
     }
 
+    var url = config.host &amp;&amp; config.protocol
+        ? config.protocol + &#x27;://&#x27; + config.host + config.url
+        : config.url;
+
     jQueryLike.ajax({
         type: config.method,
         headers: config.headers,
         contentType: config.headers[&#x27;Content-Type&#x27;],
-        url: config.url,
+        url: url,
         data: isJsonContentType(config.headers[&#x27;Content-Type&#x27;]) ? JSON.stringify(
             config.data) : config.data
     }).then(success, error);
@@ -300,9 +319,12 @@ function Http($window, $q, config) {
         delete config.params;
     }
 
+    config = config.pre.reduce((config, callback) =&gt; callback(config), config);
     vendorSpecificRequest($window)(config, function(data) {
+        data = config.post.reduce((data, callback) =&gt; callback(data), data);
         defer.resolve(data);
     }, function(error) {
+        error = config.post.reduce((error, callback) =&gt; callback(error), error);
         defer.reject(error);
     });
 
@@ -394,6 +416,8 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
      * The config object can have these keys:
      *
      *      {
+     *          pre: [],
+     *          post: [],
      *          method: &#x27;GET&#x27;,
      *          url: &#x27;/example&#x27;,
      *          data: {
@@ -415,10 +439,23 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
      *              $http.$config.headers[&#x27;Authorization&#x27;] = &#x27;Basic W@3jolb2&#x27;
      *          });
      *
+     * &#x60;pre&#x60; and &#x60;post&#x60; are callback-chains that can
+     *      1. Modify the config before a request (in case of &#x60;pre&#x60;)
+     *      2. Modify the response (in case of &#x60;post&#x60;)
+     *
+     * To add callbacks simply push them to the array. It&#x27;s up to you to manage
+     * the chain and add/remove functions from the array.
+     *
+     * The function itself will receive the config for the request (for &#x60;pre&#x60;)
+     * or the response (for &#x60;post&#x60;). The functions in the chain will receive
+     * the return value from the previous function as input. The first function
+     * will receive the original config/response as input.
+     *
      * If you change values in the headers-object make sure not to override the
      * headers object or if you do, to provide a &#x27;Content-Type&#x27; header,
      * otherwise requests might fail depending on the environment (unspecified
-     * content types should be avoided).
+     * content types should be avoided). Instead, simply add or modify headers
+     * on the existing headers object.
      *
      * The &#x60;data&#x60; field is send as the request body and the &#x60;params&#x60; key is
      * send as a query string in the url. The &#x60;headers&#x60; field allows you to set
@@ -498,6 +535,8 @@ module.exports = function($window, $q, $nodeHttp, $nodeHttps) {
     doHttp.$host = &#x27;&#x27;;
     doHttp.$protocol = &#x27;https&#x27;;
     doHttp.$config = {
+        pre: [],
+        post: [],
         method: &#x27;GET&#x27;,
         headers: {
             &#x27;Content-Type&#x27;: &#x27;application/json&#x27;
