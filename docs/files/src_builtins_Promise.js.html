@@ -17,7 +17,7 @@
                 <h1><img src="../mimeo-logo.png" title="Mimeo Public API Documentation"></h1>
         </div>
         <div class="yui3-u-1-4 version">
-            <em>API Docs for: 0.0.4</em>
+            <em>API Docs for: 0.1.3</em>
         </div>
     </div>
     <div id="bd" class="yui3-g">
@@ -152,9 +152,13 @@ function Promise() {
                 function rejectionWrapper(rejectWith) {
                     if (isFunction(onReject)) {
                         onReject(rejectWith);
+                    } else {
+                        /*
+                         * Stop rejecting the promise chain once the rejection
+                         * has been handled.
+                         */
+                        promise.reject(rejectWith);
                     }
-
-                    promise.reject(rejectWith);
                 }
 
                 if (state === &#x27;rejected&#x27;) {

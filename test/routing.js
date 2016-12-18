@@ -41,11 +41,13 @@ describe('Routing', function() {
     });
 
     it('should require an injectable when adding a route', function() {
-        expect(() => router.set('/error', 'myApp')).to.throw('injectable that is executable');
+        expect(() => router.set('/error', 'myApp')).to.throw(
+            'injectable that is executable');
     });
 
     it('should warn of switched parameter order', function() {
-        expect(() => router.set('/error', noOp, 'myApp')).to.throw('switched the parameters');
+        expect(() => router.set('/error', noOp, 'myApp')).to.throw(
+            'switched the parameters');
     });
 
     it('should set event listeners', function() {
@@ -70,22 +72,23 @@ describe('Routing', function() {
         expect(routeExecuted).to.be.true;
     });
 
-    it('should not handle a route with .onload if it was already handled', function() {
-        let targetNode = {};
-        let handleCount = 0;
+    it('should not handle a route with .onload if it was already handled',
+        function() {
+            let targetNode = {};
+            let handleCount = 0;
 
-        $window.location.href = '/test';
-        $window.document.getElementById = () => targetNode;
+            $window.location.href = '/test';
+            $window.document.getElementById = () => targetNode;
 
-        router.set('/test', 'elementId', function() {
-            ++handleCount;
+            router.set('/test', 'elementId', function() {
+                ++handleCount;
+            });
+
+            router.goto('/test');
+            $window.onload();
+
+            expect(handleCount).to.equal(1);
         });
-
-        router.goto('/test');
-        $window.onload();
-
-        expect(handleCount).to.equal(1);
-    });
 
     it('should match route parameters and decode query string', function() {
         let targetNode = {};
@@ -221,23 +224,24 @@ describe('Routing', function() {
         expect(targetNode.innerHTML).to.equal(routeContent);
     });
 
-    it('should call `render` if such an attribute exists on the route handler', function() {
-        let targetNode = {};
-        let routeContent = 'route-content';
-        let injectable = function() {};
-        injectable.render = function($context, renderer) {
-            renderer(routeContent);
-        };
+    it('should call `render` if such an attribute exists on the route handler',
+        function() {
+            let targetNode = {};
+            let routeContent = 'route-content';
+            let injectable = function() {};
+            injectable.render = function($context, renderer) {
+                renderer(routeContent);
+            };
 
-        $window.location.href = '/test';
-        $window.document.getElementById = () => targetNode;
+            $window.location.href = '/test';
+            $window.document.getElementById = () => targetNode;
 
-        router.set('/test', 'elementId', injectable);
+            router.set('/test', 'elementId', injectable);
 
-        $window.onload();
+            $window.onload();
 
-        expect(targetNode.innerHTML).to.equal(routeContent);
-    });
+            expect(targetNode.innerHTML).to.equal(routeContent);
+        });
 
     it('should use a custom renderer', function() {
         let targetNode = {};
@@ -268,6 +272,157 @@ describe('Routing', function() {
 
         expect(targetNode.customAttribute).to.equal(routeContent);
     });
+
+    it('should require onRouting handlers to be functions', function() {
+        expect(() => router.onRouting('not a function')).to.throw('must be functions');
+    });
+
+    it('should execute callbacks after matching a route', function() {
+        let params = {
+            url: '',
+            parts: {},
+            matched: false,
+            'default': false
+        };
+        let targetNode = {};
+        let eventTarget = {
+            href: '/test',
+            'data-internal': true,
+            attributes: []
+        };
+
+        $window.location.href = '/';
+        $window.document.getElementById = () => targetNode;
+
+        router.set('/test', 'elementId', () => {});
+        router.onRouting((url, parts, matched, default_) => {
+            params.url = url;
+            params.parts = parts;
+            params.matched = matched;
+            params.default = default_;
+        });
+
+        $window.onclick({
+            target: eventTarget
+        });
+
+        expect(params.url).to.equal('/test');
+        expect(params.parts.path).to.equal('/test');
+        expect(params.matched).to.be.true;
+    });
+
+    it('should execute callbacks after handling a click that matches no route',
+        function() {
+            let params = {
+                url: '',
+                parts: {},
+                matched: false,
+                'default': false
+            };
+            let targetNode = {};
+            let eventTarget = {
+                href: '/test-no-match',
+                'data-internal': true,
+                attributes: []
+            };
+
+            $window.location.href = '/';
+            $window.document.getElementById = () => targetNode;
+
+            router.set('/test', 'elementId', () => {});
+            router.onRouting((url, parts, matched, default_) => {
+                params.url = url;
+                params.parts = parts;
+                params.matched = matched;
+                params.default = default_;
+            });
+
+            $window.onclick({
+                target: eventTarget
+            });
+
+            expect(params.url).to.equal('/test-no-match');
+            expect(params.parts.path).to.equal('/test-no-match');
+            expect(params.matched).to.be.false;
+        });
+
+    it('should execute callbacks after handling the default route', function() {
+        let params = {
+            url: '',
+            parts: {},
+            matched: false,
+            'default': false
+        };
+        let targetNode = {};
+        let eventTarget = {
+            href: '/test-no-match',
+            'data-internal': true,
+            attributes: []
+        };
+
+        $window.location.href = '/';
+        $window.document.getElementById = () => targetNode;
+
+        router.setDefaultRoute('/test-default');
+        router.set('/test', 'elementId', () => {});
+        router.set('/test-default', 'elementId', () => {});
+        router.onRouting((url, parts, matched, default_) => {
+            params.url = url;
+            params.parts = parts;
+            // dont switch from true to false as onRouting is executed twice
+            // once for current route once for default
+            params.matched = matched || params.matched;
+            params.default = default_ || params.default;
+        });
+
+        $window.onclick({
+            target: eventTarget
+        });
+
+        expect(params.url).to.equal('/test-no-match');
+        expect(params.parts.path).to.equal('/test-no-match');
+        expect(params.matched).to.be.true;
+        expect(params.default).to.be.true;
+    });
+
+    it('should execute callbacks after handling the default route even if default route has no handler',
+        function() {
+            let params = {
+                url: '',
+                parts: {},
+                matched: false,
+                'default': false
+            };
+            let targetNode = {};
+            let eventTarget = {
+                href: '/test-no-match',
+                'data-internal': true,
+                attributes: []
+            };
+
+            $window.location.href = '/';
+            $window.document.getElementById = () => targetNode;
+
+            router.setDefaultRoute('/test-default');
+            router.set('/test', 'elementId', () => {});
+            router.onRouting((url, parts, matched, default_) => {
+                params.url = url;
+                params.parts = parts;
+                // dont switch from true to false as onRouting is executed twice
+                // once for current route once for default
+                params.matched = matched || params.matched;
+                params.default = default_ || params.default;
+            });
+
+            $window.onclick({
+                target: eventTarget
+            });
+
+            expect(params.url).to.equal('/test-no-match');
+            expect(params.parts.path).to.equal('/test-no-match');
+            expect(params.matched).to.be.false;
+            expect(params.default).to.be.true;
+        });
 
     it('should match a route after a click', function() {
         let routeExecuted = false;
@@ -319,31 +474,32 @@ describe('Routing', function() {
         expect(routeExecuted).to.be.true;
     });
 
-    it('should ignore a click on a that does not have an ancestor with data-internal', function() {
-        let routeExecuted = false;
-        let targetNode = {};
-        let eventTarget = {
-            attributes: [],
-            parentNode: {
+    it('should ignore a click on a that does not have an ancestor with data-internal',
+        function() {
+            let routeExecuted = false;
+            let targetNode = {};
+            let eventTarget = {
+                attributes: [],
                 parentNode: {
-                    href: '/test'
+                    parentNode: {
+                        href: '/test'
+                    }
                 }
-            }
-        };
+            };
 
-        $window.location.href = '/';
-        $window.document.getElementById = () => targetNode;
+            $window.location.href = '/';
+            $window.document.getElementById = () => targetNode;
 
-        router.set('/test', 'elementId', function() {
-            routeExecuted = true;
+            router.set('/test', 'elementId', function() {
+                routeExecuted = true;
+            });
+
+            $window.onclick({
+                target: eventTarget
+            });
+
+            expect(routeExecuted).to.be.false;
         });
-
-        $window.onclick({
-            target: eventTarget
-        });
-
-        expect(routeExecuted).to.be.false;
-    });
 
     it('should support getAttributes() on DOMNode', function() {
         let routeExecuted = false;
@@ -483,27 +639,28 @@ describe('Routing', function() {
         expect(event.returnValue).to.be.false;
     });
 
-    it('should support ignore clicks that are missing `data-internal` attribute', function() {
-        let targetNode = {};
-        let event = {
-            target: {
-                href: '/test',
-                attributes: []
-            }
-        };
-        let routeExecuted = false;
+    it('should support ignore clicks that are missing `data-internal` attribute',
+        function() {
+            let targetNode = {};
+            let event = {
+                target: {
+                    href: '/test',
+                    attributes: []
+                }
+            };
+            let routeExecuted = false;
 
-        $window.location.href = '/';
-        $window.document.getElementById = () => targetNode;
+            $window.location.href = '/';
+            $window.document.getElementById = () => targetNode;
 
-        router.set('/test', 'elementId', function() {
-            routeExecuted = true;
+            router.set('/test', 'elementId', function() {
+                routeExecuted = true;
+            });
+
+            $window.onclick(event);
+
+            expect(routeExecuted).to.be.false;
         });
-
-        $window.onclick(event);
-
-        expect(routeExecuted).to.be.false;
-    });
 
     it('should support fix safari text clicks', function() {
         let targetNode = {};
@@ -559,32 +716,33 @@ describe('Routing', function() {
         expect(pushStateCalled).to.be.true;
     });
 
-    it('should call replace state with attribute `data-no-history`', function() {
-        let targetNode = {};
-        let replaceStateCalled = false;
-        let event = {
-            target: {
-                href: '/test',
-                'data-internal': true,
-                'data-no-history': true,
-                attributes: []
-            }
-        };
-        let routeExecuted = false;
+    it('should call replace state with attribute `data-no-history`',
+        function() {
+            let targetNode = {};
+            let replaceStateCalled = false;
+            let event = {
+                target: {
+                    href: '/test',
+                    'data-internal': true,
+                    'data-no-history': true,
+                    attributes: []
+                }
+            };
+            let routeExecuted = false;
 
-        $window.location.href = '/';
-        $window.history.replaceState = () => replaceStateCalled = true;
-        $window.document.getElementById = () => targetNode;
+            $window.location.href = '/';
+            $window.history.replaceState = () => replaceStateCalled = true;
+            $window.document.getElementById = () => targetNode;
 
-        router.set('/test', 'elementId', function() {
-            routeExecuted = true;
+            router.set('/test', 'elementId', function() {
+                routeExecuted = true;
+            });
+
+            $window.onclick(event);
+
+            expect(routeExecuted).to.be.true;
+            expect(replaceStateCalled).to.be.true;
         });
-
-        $window.onclick(event);
-
-        expect(routeExecuted).to.be.true;
-        expect(replaceStateCalled).to.be.true;
-    });
 
     it('should support onpopstate', function() {
         let targetNode = {};

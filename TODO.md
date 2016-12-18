@@ -5,3 +5,4 @@
 
 ## Mimeo
 - Investigate rollup for minification
+- add documentation for onRouting callbacks

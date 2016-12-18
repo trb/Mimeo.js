@@ -3,7 +3,7 @@
         "name": "Mimeo Public API Documentation",
         "description": "Detailed explanation of Mimeos public api",
         "logo": "mimeo-logo.png",
-        "version": "0.0.4"
+        "version": "0.1.3"
     },
     "files": {
         "src/builtins/Http.js": {
@@ -146,7 +146,7 @@
             "module": "Builtins",
             "namespace": "",
             "file": "src/builtins/Http.js",
-            "line": 274,
+            "line": 275,
             "description": "# Send http(s) requests to a server\n\nYou can use $http in two ways, either as a function that accepts a\nconfiguration object, or use shorthand methods for common HTTP methods.\n\nTo use $http as a function, the config object needs to include the url\nand http method:\n\n     $http({\n         url: '/example',\n         method: 'GET'\n     });\n\nFor common http methods there are shorthand functions:\n\n     $http.get('/url');\n     $http.post('/example', { key: 'value' });\n\nBoth variations will return a Promise that resolves with the response\nfrom the server:\n\n     $http.get('/example').then((response) => {\n         console.log(response.data);\n     });\n\nThe response object has the following properties:\n\n     {\n         data: {},\n         //Data is the response body. If response content type is\n         //'application/json' the response body will be JSON decoded and\n         //the decoded object will be accessible in `data`\n         status: 200, // http response code,\n         headers: {\n             'Content-Type': 'application/json'\n         },// response http-headers,\n         config: config, // config object send with request\n         statusText: '200 Success' // http status text\n     }\n\nAll shorthand-methods are documented separately and optionally accept\nthe same config-object `$http` as a function accepts. Should the config\nobject contain different data than the arguments for the shorthand\nmethod, then the arguments to the method take precedent:\n\n     $http.get('/example', {}, { url: '/not-used' });\n     //=> Sends request to '/example'\n\n## Configuration\n\nThe config object can have these keys:\n\n     {\n         pre: [],\n         post: [],\n         method: 'GET',\n         url: '/example',\n         data: {\n             key: 'value'\n         },\n         params: {\n             search: 'a search criteria'\n         },\n         headers: {\n             'Content-Type': 'application/json'\n         }\n     }\n\nDefault settings can be set directly on `$http` and will be used for all\nfuture requests:\n\n     mimeo.module('example', [])\n         .run(['$http', ($http) => {\n             $http.$config.headers['Authorization'] = 'Basic W@3jolb2'\n         });\n\n`pre` and `post` are callback-chains that can\n     1. Modify the config before a request (in case of `pre`)\n     2. Modify the response (in case of `post`)\n\nTo add callbacks simply push them to the array. It's up to you to manage\nthe chain and add/remove functions from the array.\n\nThe function itself will receive the config for the request (for `pre`)\nor the response (for `post`). The functions in the chain will receive\nthe return value from the previous function as input. The first function\nwill receive the original config/response as input.\n\nIf you change values in the headers-object make sure not to override the\nheaders object or if you do, to provide a 'Content-Type' header,\notherwise requests might fail depending on the environment (unspecified\ncontent types should be avoided). Instead, simply add or modify headers\non the existing headers object.\n\nThe `data` field is send as the request body and the `params` key is\nsend as a query string in the url. The `headers` field allows you to set\nhttp headers for only this request, usually used to set a content type.\n\nThe default content type is 'application/json', so by default, `data`\nwill be send as a JSON string to the server. If you want to send a\nbrowser-like form string (content type\n'application/x-www-form-urlencoded') you have to set the content type\nin the `headers` field and `data` must be a string. It's up to you to\nbuild the form-urlencoded string.\n\n## Defaults\n\nThe default values `$http` uses can be changed and will be applied to\nevery request. There are three configurable properties:\n\n- `$http.$host`\n- `$http.$protocol`\n- `$http.$config`\n\n`$http.$host` is the host that will be used for every request. By\ndefault, no host is used. For use in the browser this is fine, as the\nbrowser simply uses the current host. For use with NodeJS `$http.$host`\nhas to be set as there is not default host. Setting the host for the\nbrowser will send all requests to the specified host, and not the\ncurrent host. In that case the host has to support\n[cross-origin HTTP\nrequests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS).\n\n`$http.$protocol` should be one of 'http' or 'https', depending on what\nyour app uses.\n\n`$http.$config` is merged into the config object passed to `$http` or\none\nof the shorthand methods. The settings in the config object passed to\n`$http` or the shorthand method takes precedent:\n\n     $http.$config.headers['Authorization'] = 'Basic F@L#B';\n     $http.post('/example', { key: 'value' }, {\n         headers: {\n             'Authorization': 'None'\n         }\n     );\n     //=> Will send 'None' as the 'Authorization' header.\n\nAn example changing all the available properties:\n\n     mimeo.module('example', [])\n         .run(['$http', ($http) => {\n             $http.$host = 'http://www.example.com';\n             $http.$protocol = 'https';\n             $http.$config.headers['Authorization'] = 'Basic F@L#B'\n         });",
             "params": [
                 {
@@ -188,7 +188,7 @@
             "module": "Builtins",
             "namespace": "",
             "file": "src/builtins/Promise.js",
-            "line": 153,
+            "line": 157,
             "description": "The deferred object that's wrapped by $q",
             "params": [
                 {
@@ -210,7 +210,7 @@
             "module": "Builtins",
             "namespace": "",
             "file": "src/builtins/Promise.js",
-            "line": 205,
+            "line": 209,
             "description": "Creates and manages promises. Used by $http and $routing.\n\n$q is used to create a deferred object, which contains a promise. The\ndeferred is used to create and manage promises.\n\nA promise accepts resolution, rejection and notification handlers that are\nexecuted when the promise itself is resolved, rejected or notified. The\nhandlers are attached to the promise via the {{#crossLink \"Promise/then:method\"}}\n.then(){{/crossLink}} method.\n\nYou can attach multiple handlers by calling .then() multiple times with\ndifferent handlers. In addition, you can chain .then() calls. In this case,\nthe return value from .then() is a new promise that's attached to the resolve\nhandler passed to .then(). This way you can return promises from your resolve\nhandler and the next .then() will wait until that promise is resolved to\ncontinue. Usually used to do multiple asyncronous calls in sequence.",
             "params": [
                 {
@@ -275,7 +275,7 @@
     "classitems": [
         {
             "file": "src/builtins/Http.js",
-            "line": 436,
+            "line": 437,
             "description": "When using Mimeo on NodeJS, setting $host to the host you want to send\nrequests to is a requirement.",
             "itemtype": "property",
             "name": "$host",
@@ -285,7 +285,7 @@
         },
         {
             "file": "src/builtins/Http.js",
-            "line": 455,
+            "line": 456,
             "description": "Send a GET request",
             "itemtype": "method",
             "name": "get",
@@ -318,7 +318,7 @@
         },
         {
             "file": "src/builtins/Http.js",
-            "line": 477,
+            "line": 478,
             "description": "Send a HEAD request. The server response will not include a body",
             "itemtype": "method",
             "name": "head",
@@ -351,7 +351,7 @@
         },
         {
             "file": "src/builtins/Http.js",
-            "line": 499,
+            "line": 500,
             "description": "Send a POST request. By default, `data` will be JSON encoded and send as\nthe request body.",
             "itemtype": "method",
             "name": "post",
@@ -384,7 +384,7 @@
         },
         {
             "file": "src/builtins/Http.js",
-            "line": 524,
+            "line": 525,
             "description": "Send a PUT request. By default, `data` will be JSON encoded and send as\nthe request body.",
             "itemtype": "method",
             "name": "put",
@@ -417,7 +417,7 @@
         },
         {
             "file": "src/builtins/Http.js",
-            "line": 549,
+            "line": 550,
             "description": "Send a PATCH request. By default, `data` will be JSON encoded and send as\nthe request body.",
             "itemtype": "method",
             "name": "patch",
@@ -450,7 +450,7 @@
         },
         {
             "file": "src/builtins/Http.js",
-            "line": 572,
+            "line": 573,
             "description": "Send a DELETE request. Does not accept any parameters or data to send\nwith the request, as the URL should identify the entity to delete",
             "itemtype": "method",
             "name": "delete",
@@ -508,7 +508,7 @@
         },
         {
             "file": "src/builtins/Promise.js",
-            "line": 88,
+            "line": 92,
             "description": "Registers a rejection handler. Shorthand for `.then(_, onReject)`.",
             "itemtype": "method",
             "name": "catch",
@@ -528,7 +528,7 @@
         },
         {
             "file": "src/builtins/Promise.js",
-            "line": 102,
+            "line": 106,
             "description": "Send a notification to the promise.",
             "itemtype": "method",
             "name": "notify",
@@ -544,7 +544,7 @@
         },
         {
             "file": "src/builtins/Promise.js",
-            "line": 115,
+            "line": 119,
             "description": "Rejects the promise.",
             "itemtype": "method",
             "name": "reject",
@@ -560,7 +560,7 @@
         },
         {
             "file": "src/builtins/Promise.js",
-            "line": 132,
+            "line": 136,
             "description": "Resolves the promise.",
             "itemtype": "method",
             "name": "resolve",
@@ -576,7 +576,7 @@
         },
         {
             "file": "src/builtins/Promise.js",
-            "line": 170,
+            "line": 174,
             "description": "See {{#crossLink \"Promise/resolve:method\"}}the underlying\npromises resolve{{/crossLink}} documentation.",
             "itemtype": "method",
             "name": "resolve",
@@ -585,7 +585,7 @@
         },
         {
             "file": "src/builtins/Promise.js",
-            "line": 179,
+            "line": 183,
             "description": "See {{#crossLink \"Promise/reject:method\"}}the underlying\npromises reject{{/crossLink}} documentation.",
             "itemtype": "method",
             "name": "reject",
@@ -594,7 +594,7 @@
         },
         {
             "file": "src/builtins/Promise.js",
-            "line": 188,
+            "line": 192,
             "description": "See {{#crossLink \"Promise/notify:method\"}}the underlying\npromises notify{{/crossLink}} documentation.",
             "itemtype": "method",
             "name": "notify",
@@ -603,7 +603,7 @@
         },
         {
             "file": "src/builtins/Promise.js",
-            "line": 197,
+            "line": 201,
             "itemtype": "property",
             "name": "promise",
             "type": "Promise",
@@ -612,7 +612,7 @@
         },
         {
             "file": "src/builtins/Promise.js",
-            "line": 233,
+            "line": 237,
             "description": "Create a new defer. This method requires no arguments, the returned defer has\nthe methods required to resolve/reject/notify the promise.",
             "example": [
                 "\n     let defer = $q.defer();\n     defer.promise.then((name) => console.log('Hi ' + name));\n     defer.resolve('John');\n     //=> \"Hi John\""
@@ -628,7 +628,7 @@
         },
         {
             "file": "src/builtins/Promise.js",
-            "line": 250,
+            "line": 254,
             "description": "Creates a new promise and resolves it with `value`. If `value` is a promise,\nthe returned promise is attached to `value`. If onResolve, onReject or\nonNotify are given, they are attached to the new promise.",
             "itemtype": "method",
             "name": "when",
@@ -669,7 +669,7 @@
         },
         {
             "file": "src/builtins/Promise.js",
-            "line": 287,
+            "line": 291,
             "description": "Alias for {{#crossLink \"$q/when:method\"}}$q.when{{/crossLink}}",
             "itemtype": "method",
             "name": "resolve",
@@ -678,7 +678,7 @@
         },
         {
             "file": "src/builtins/Promise.js",
-            "line": 294,
+            "line": 298,
             "description": "Takes an array of promises (called inner promises) and creates a new promise\n(called outer promise) that resolves when all the inner promises resolve.\nIf any of the inner promises are rejected, the outer promise is\nimmediately rejected as well and any other inner promises left over are\ndiscarded.\n\nE.g. if you have three inner promises, A, B, and C, then the outer promise O\nis resolved once all three A, B and C are resolved.\n\nIf A is resolved, and B is rejected, and C is pending, then O will be\nrejected regardless of C's outcome.",
             "itemtype": "method",
             "name": "all",
@@ -701,7 +701,23 @@
         },
         {
             "file": "src/builtins/Routing.js",
-            "line": 243,
+            "line": 273,
+            "description": "Add event handlers to be executed whenever a new route is handled,\nvia {{#crossLink \"$routing/goto:method\"}}$routing.goto(){{/crossLink}},\nthe window.onpopstate event or a click on a controlled link.",
+            "itemtype": "method",
+            "name": "onRouting",
+            "params": [
+                {
+                    "name": "handler",
+                    "description": "The callback to be executed when a new url\n is handled. It receives four parameters:\n\n     - url {string} The url handled (regardless if handlers are found)\n     - parts {object} Parsed url, same as $context.url that's passed\n         to a route handler\n     - handlerExecuted {Boolean} Whether a handler was found and\n         executed\n     - defaultRouteExecuted {Boolean} Whether the url handled was the\n         default route",
+                    "type": "Function"
+                }
+            ],
+            "class": "$routing",
+            "module": "Builtins"
+        },
+        {
+            "file": "src/builtins/Routing.js",
+            "line": 298,
             "description": "Set a default route to redirect to when the current route isn't\nmatched to anything",
             "itemtype": "method",
             "name": "setDefaultRoute",
@@ -717,7 +733,7 @@
         },
         {
             "file": "src/builtins/Routing.js",
-            "line": 260,
+            "line": 315,
             "description": "Set a custom factory for render functions\n\nRender factories receive the DOM target node for the route and\nproduce an executable that can be used to render content (that\nexecutable is called `renderer`).\n\nA new renderer is created every time a route is matched by passing\nthe routes target DOM node to the makeRenderer function.\n\nRenderer functions are passed to the injectable that is matched with\nthe route. `setMakeRenderer` sets the factory that creates the\nrender functions.\n\nThe default makeRenderer factory produces renderer functions that\nsimply set innerHTML on the target DOM node:\n\n     function(targetAsDOMNode) {\n         return function(toRender) {\n             targetAsDOMNode.innerHTML = toRender;\n         };\n     }\n\nThe injectable for any given route can use the render method like\nthis:\n\n     mimeo.module('example', [])\n         .component(['component', () => ($context, $renderer) => {\n             $renderer('<h1>Headline content</h1>');\n         }]);\n\nWhen using a rendering library, it's often beneficial to set a\ncustom\nrenderer factory to simplify rendering in the component. E.g. with\nReact, custom components are mounted on DOM nodes via\n\n     ReactDOM.render(<Component/>, DOMNode);\n\nA custom `setMakeRenderer` for React would create a function that\naccepts a React component and mounts it to the routes target DOM\nnode:\n\n     $routing.setMakeRenderer(function(targetDOMNode) {\n         return function(component) {\n             ReactDOM.render(component, targetDOMNode);\n         }\n     });",
             "itemtype": "method",
             "name": "setMakeRenderer",
@@ -733,7 +749,7 @@
         },
         {
             "file": "src/builtins/Routing.js",
-            "line": 321,
+            "line": 376,
             "description": "Sets a handler for a route. There can be multiple handlers for any\nroute.\n\nThe route matching is handled by (the route-recognizer package,\nread the docs regarding the route syntax\nhere)[https://github.com/tildeio/route-recognizer#usage]. You can\ncapture parts of the url with `:name` and `*name`:\n\n     $routing.set('/users/:id')\n     //=> matches /users/1 to { id: 1 }\n\n     $routing.set('/about/*path')\n     //=> matches /about/location/city to { path: 'location/city' }\n\nCaptured segments of the url will be available in `$context.params`.\n\nSetting a route matches an injectable with a url:\n\n     $routing.set('/example-url', exampleInjectable);\n\nThe injectable that will receive three parameters:\n\n- $context - information about the current route and access to url\nparameters\n- $renderer - the renderer $routing is configured to use. Default\njust set the html content of the target DOM node\n- $target - DOM node that the content should end up in. Useful if\nyou don't want to use $renderer for a specific route\n\nSet routes in a `.run()` block on your root module:\n\n     mimeo.bootstrap('example', [])\n         .component(['users', () => ($context, $renderer) => {\n             $renderer('<ul><li>John</li><li>Alice</li</ul>');\n         }])\n         .component(['loginForm', () => ($context, $renderer) => {\n             $renderer('<form></form>');\n         }])\n         .run([\n             '$routing',\n             'users',\n             'loginForm',\n             ($routing, users, loginForm) => {\n                 $routing.set('/users', users);\n                 $routing.set('/login', loginForm);\n             }\n         ]);\n\nThe `.run()` block needs to have all component-injectables you want\nto set as route handlers injected. `.set()` requires the actual\ninjectables to be passed in, not the injectables name.\n\n$context contains information about the current route, it has three\nattributes:\n\n- `$context.params` will contain any matched segments from the url.\n- `$context.query` will contain decoded query parameters as a\nkey-value hash. Repeating keys will create an array:\n`/example?a=1&b=2&c=3 //=> { a: [1, 2, 3] }`\n- `$context.url` represents the parsed url as a key-value store.\n\n`$context.url` example for\n`http://localhost:3000/?example-key=value`:\n\n     $context.url = {\n         anchor: '',\n         authority: 'localhost:3000',\n         directory: '/',\n         file: '',\n         host: 'localhost',\n         password: '',\n         path: '/',\n         port: '3000',\n         protocol: 'http',\n         query: 'example-key=value',\n         relative: '/?example-key=value',\n         source: 'http://localhost:3000/?example-key=value',\n         user: '',\n         userInfo: ''\n     }",
             "itemtype": "method",
             "name": "set",
@@ -765,7 +781,7 @@
         },
         {
             "file": "src/builtins/Routing.js",
-            "line": 445,
+            "line": 500,
             "description": "Matches `route` and executes all associated injectables\n\nThe return values from the matched injectables are turned into a\npromise using {{#crossLink\n\"$q/when:method\"}}$q.when(){{/crossLink}},\nand then aggregated with {{#crossLink\n\"$q/all:method\"}}$q.all(){{/crossLink}} and then returned by\n`goto()`. This allows handling asynchronous requests on the server.",
             "example": [
                 "\n     mimeo.module('example', []).\n         .component('Blog', ['$http', ($http) => () => {\n             return $http.get('/example-api/blogs')\n                 .then((response) => {\n                     return response.data;\n                 })\n                 .then((blogPosts) => {\n                     return //turn blog posts into html\n                 });\n         })\n         .run(['$routing', 'Blog', ($routing, Blog) => {\n             $routing.set('/blogs', Blog);\n         }])\n         .run(['$routing', ($routing) => {\n             $routing.goto('/blogs').then((blogHtml) => {\n                 // save to cdn\n             });\n         });"
@@ -981,31 +997,31 @@
     "warnings": [
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " src/builtins/Http.js:455"
+            "line": " src/builtins/Http.js:456"
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " src/builtins/Http.js:477"
+            "line": " src/builtins/Http.js:478"
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " src/builtins/Http.js:499"
+            "line": " src/builtins/Http.js:500"
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " src/builtins/Http.js:524"
+            "line": " src/builtins/Http.js:525"
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " src/builtins/Http.js:549"
+            "line": " src/builtins/Http.js:550"
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " src/builtins/Http.js:572"
+            "line": " src/builtins/Http.js:573"
         },
         {
             "message": "replacing incorrect tag: returns with return",
-            "line": " src/builtins/Routing.js:445"
+            "line": " src/builtins/Routing.js:500"
         },
         {
             "message": "replacing incorrect tag: returns with return",

@@ -111,6 +111,7 @@ function Routing($q, $window) {
             targetAsDOMNode.innerHTML = toRender;
         };
     };
+    var onRoutingHandlers = [];
 
     function preventDefault(event) {
         if (event.preventDefault) {
@@ -160,7 +161,7 @@ function Routing($q, $window) {
 
     function doDefaultRoute(route) {
         $window.history.pushState(null, '', route);
-        return doRouting(route, false);
+        return doRouting(route, false, true);
     }
 
     function queryToDict(query) {
@@ -182,10 +183,12 @@ function Routing($q, $window) {
         return dict;
     }
 
-    function doRouting(url, doDefault) {
+    function doRouting(url, doDefault, isDefault) {
         anyRouteHandled = true;
         var urlParts = parseUri(url);
         var handlers = routing.recognize(urlParts.path);
+        var handlerExecuted = false;
+        var defaultRouteExecuted = isDefault || false;
         var promises = [];
         if (handlers) {
             for (var i = 0; i < handlers.length; ++i) {
@@ -197,9 +200,14 @@ function Routing($q, $window) {
 
                 promises.push(handlers[i].handler($context));
             }
+            handlerExecuted = true;
         } else if ((doDefault !== false) && defaultRoute) {
             promises.push(doDefaultRoute(defaultRoute));
         }
+
+        onRoutingHandlers.forEach(function(handler) {
+            handler(url, urlParts, handlerExecuted, defaultRouteExecuted);
+        });
 
         return $q.all(promises);
     }
@@ -262,6 +270,31 @@ function Routing($q, $window) {
     };
 
     return {
+        /**
+         * Add event handlers to be executed whenever a new route is handled,
+         * via {{#crossLink "$routing/goto:method"}}$routing.goto(){{/crossLink}},
+         * the window.onpopstate event or a click on a controlled link.
+         *
+         * @method onRouting
+         * @for $routing
+         * @param {Function} handler The callback to be executed when a new url
+         *  is handled. It receives four parameters:
+         *
+         *      - url {string} The url handled (regardless if handlers are found)
+         *      - parts {object} Parsed url, same as $context.url that's passed
+         *          to a route handler
+         *      - handlerExecuted {Boolean} Whether a handler was found and
+         *          executed
+         *      - defaultRouteExecuted {Boolean} Whether the url handled was the
+         *          default route
+         */
+        'onRouting': function(handler) {
+            if (!(handler instanceof Function)) {
+                throw new Error('$routing onRouting event handlers must be functions');
+            }
+            onRoutingHandlers.push(handler);
+        },
+
         /**
          * Set a default route to redirect to when the current route isn't
          * matched to anything
